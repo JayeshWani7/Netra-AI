@@ -1,0 +1,36 @@
+<Window x:Class="NetraAI.Desktop.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Netra AI - Dashboard"
+    Height="700"
+    Width="1200"
+    WindowStartupLocation="CenterScreen"
+    Background="{StaticResource BrushBackground}"
+    Foreground="{StaticResource BrushText}">
+    
+    <Grid>
+        <!-- Left Sidebar -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Border Background="{StaticResource BrushSurface}" Grid.Column="0" Padding="20">
+            <StackPanel>
+                <TextBlock Text="Chat History" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,16"/>
+                
+                <!-- Placeholder Chat Items -->
+                <TextBlock Text="No chat history yet" Foreground="{StaticResource BrushText}" Opacity="0.6"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <Grid Grid.Column="1" Margin="20">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Welcome to Netra AI" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center"/>
+                <TextBlock Text="Start a conversation or capture your screen to get AI-powered insights" 
+                           Style="{StaticResource SubHeaderTextStyle}" TextAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
