@@ -1,0 +1,81 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio cache/options
+.vs/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Rider - Resharper IDE
+.idea/
+
+# Local environment variables (DO NOT COMMIT)
+.env
+.env.local
+.env.*.local
+
+# API Keys and secrets (DO NOT COMMIT)
+docs/API_KEYS.md
+!docs/API_KEYS.md.example
+
+# Application data
+%AppData%/NetraAI/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Database files
+*.db
+*.db-journal
+
+# Tesseract data
+tessdata/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.nupkg
+
+# IDE specific
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# Package manager
+packages/
+node_modules/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temp files
+tmp/
+temp/
+*.tmp
+*.sln
+*.xaml
