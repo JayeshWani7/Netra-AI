@@ -2,6 +2,7 @@ using System.Windows;
 using NetraAI.Desktop.Utils;
 using System.Diagnostics;
 using System.IO;
+using NetraAI.Desktop.Views;
 
 namespace NetraAI.Desktop
 {
@@ -31,15 +32,19 @@ namespace NetraAI.Desktop
                 File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] DI initialized\n");
                 
                 logger.Info("Netra AI application started");
-                
-                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] About to show MessageBox\n");
-                MessageBox.Show("✅ App started successfully! LoginWindow should be visible.", "Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] MessageBox closed\n");
+
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] Creating LoginWindow\n");
+                var loginWindow = new LoginWindow();
+                MainWindow = loginWindow;
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
+                loginWindow.Show();
+                loginWindow.Activate();
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] LoginWindow shown\n");
             }
             catch (Exception ex)
             {
                 File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] EXCEPTION: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}\n");
-                MessageBox.Show($"❌ Failed to start: {ex.Message}\n\n{ex.StackTrace}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to start login window:\n{ex.GetType().Name}: {ex.Message}\n\n{ex.StackTrace}", "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 this.Shutdown(1);
             }
         }

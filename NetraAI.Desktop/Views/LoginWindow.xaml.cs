@@ -11,7 +11,6 @@ namespace NetraAI.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += (s, e) => System.Diagnostics.Debug.WriteLine("LoginWindow loaded successfully");
-            this.Show();
         }
     }
 }
