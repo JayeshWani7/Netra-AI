@@ -20,6 +20,9 @@ namespace NetraAI.Desktop.Utils
             {
                 if (_provider == null)
                 {
+                    // Initialize configuration first
+                    ConfigurationManager.Initialize();
+
                     var services = new ServiceCollection();
 
                     // Register logging

@@ -1,4 +1,8 @@
 using System.Windows;
+using System.Windows.Controls;
+using NetraAI.Desktop.Services;
+using NetraAI.Desktop.Utils;
+using NetraAI.Desktop.Models;
 
 namespace NetraAI.Desktop.Views
 {
@@ -7,9 +11,136 @@ namespace NetraAI.Desktop.Views
     /// </summary>
     public partial class PermissionsWindow : Window
     {
+        private readonly PermissionService _permissionService;
+        private readonly NavigationService _navigationService;
+        private readonly ILogger _logger;
+
         public PermissionsWindow()
         {
             InitializeComponent();
+            
+            _permissionService = ServiceProvider.GetRequiredService<PermissionService>();
+            _navigationService = ServiceProvider.GetRequiredService<NavigationService>();
+            _logger = Logger.GetInstance();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _logger.Info("PermissionsWindow loaded");
+                LoadSavedPermissions();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error loading permissions: {ex.Message}", ex);
+            }
+        }
+
+        private void LoadSavedPermissions()
+        {
+            try
+            {
+                _logger.Info("Loading saved permissions...");
+                
+                // TODO: Load permissions from PermissionService
+                // For now, set defaults:
+                // - Screen Capture: required, checked by default
+                // - Microphone: optional, unchecked
+                // - Background: recommended, checked by default
+                // - Clipboard: optional, unchecked
+                
+                _logger.Info("Permissions loaded");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to load permissions: {ex.Message}", ex);
+            }
+        }
+
+        private void GrantAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _logger.Info("Grant All clicked");
+                
+                // Grant all permissions
+                ScreenCaptureCheckbox.IsChecked = true;
+                MicrophoneCheckbox.IsChecked = true;
+                BackgroundCheckbox.IsChecked = true;
+                ClipboardCheckbox.IsChecked = true;
+                
+                SavePermissions();
+                ProceedToMainWindow();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error granting all permissions: {ex.Message}", ex);
+                MessageBox.Show("Error granting permissions", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void DenyAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _logger.Info("Deny All clicked");
+                
+                // Allow only screen capture (it's required)
+                ScreenCaptureCheckbox.IsChecked = true;
+                MicrophoneCheckbox.IsChecked = false;
+                BackgroundCheckbox.IsChecked = false;
+                ClipboardCheckbox.IsChecked = false;
+                
+                SavePermissions();
+                ProceedToMainWindow();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error denying permissions: {ex.Message}", ex);
+                MessageBox.Show("Error updating permissions", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SavePermissions()
+        {
+            try
+            {
+                _logger.Info("Saving permissions...");
+                
+                var permissions = new Permission
+                {
+                    PermissionId = Guid.NewGuid().ToString(),
+                    UserId = string.Empty, // TODO: Get from current user
+                    ScreenAccess = ScreenCaptureCheckbox.IsChecked ?? false,
+                    MicrophoneAccess = MicrophoneCheckbox.IsChecked ?? false,
+                    BackgroundRunning = BackgroundCheckbox.IsChecked ?? false,
+                    ClipboardAccess = ClipboardCheckbox.IsChecked ?? false,
+                    GrantedAt = DateTime.UtcNow,
+                    IsExplicitlyRequested = true
+                };
+                
+                // TODO: Save permissions using PermissionService
+                _logger.Info($"Permissions saved: Screen={permissions.ScreenAccess}, Mic={permissions.MicrophoneAccess}, Background={permissions.BackgroundRunning}, Clipboard={permissions.ClipboardAccess}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to save permissions: {ex.Message}", ex);
+            }
+        }
+
+        private void ProceedToMainWindow()
+        {
+            try
+            {
+                _logger.Info("Proceeding to MainWindow");
+                _navigationService.NavigateToMain(this);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to navigate to MainWindow: {ex.Message}", ex);
+                MessageBox.Show("Error proceeding to main window", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

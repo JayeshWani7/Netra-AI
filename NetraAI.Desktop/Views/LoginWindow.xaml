@@ -2,43 +2,67 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Netra AI - Login"
-    Height="600"
+    Height="650"
     Width="450"
     WindowStartupLocation="CenterScreen"
     Background="{StaticResource BrushBackground}"
     Foreground="{StaticResource BrushText}"
-    ResizeMode="NoResize">
+    ResizeMode="NoResize"
+    Loaded="Window_Loaded">
     
     <Grid>
-        <StackPanel VerticalAlignment="Center" Margin="40">
+        <StackPanel VerticalAlignment="Center" Margin="40" x:Name="LoginPanel">
             <TextBlock Text="Netra AI" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center"/>
             <TextBlock Text="Sign in to continue" Style="{StaticResource SubHeaderTextStyle}" TextAlignment="Center" Margin="0,0,0,32"/>
             
+            <!-- Error Message -->
+            <Border x:Name="ErrorBorder" Background="#ef4444" CornerRadius="8" Padding="12" Margin="0,0,0,16" Visibility="Collapsed">
+                <TextBlock x:Name="ErrorMessage" Foreground="White" TextWrapping="Wrap" FontSize="12"/>
+            </Border>
+            
+            <!-- Sign In / Sign Up Tabs -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                <Button x:Name="SignInTab" Content="Sign In" Style="{StaticResource PrimaryButtonStyle}" Padding="20,10" Click="SignInTab_Click" Tag="signin"/>
+                <Button x:Name="SignUpTab" Content="Sign Up" Background="#444444" Foreground="{StaticResource BrushText}" Padding="20,10" Margin="12,0,0,0" Click="SignUpTab_Click" Tag="signup"/>
+            </StackPanel>
+            
             <!-- Email Input -->
-            <TextBlock Text="Email" Foreground="{StaticResource BrushText}" Margin="0,0,0,8"/>
-            <TextBox x:Name="EmailTextBox" Style="{StaticResource CustomTextBoxStyle}" Margin="0,0,0,16" Height="40"/>
+            <TextBlock Text="Email" Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
+            <TextBox x:Name="EmailTextBox" Style="{StaticResource CustomTextBoxStyle}" Margin="0,0,0,16" Height="40" Padding="12,10" FontSize="14"/>
             
             <!-- Password Input -->
-            <TextBlock Text="Password" Foreground="{StaticResource BrushText}" Margin="0,0,0,8"/>
+            <TextBlock Text="Password" Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
             <PasswordBox x:Name="PasswordBox" Margin="0,0,0,8" Height="40" Background="{StaticResource BrushSurface}" Foreground="{StaticResource BrushText}" BorderBrush="#444444" BorderThickness="1" Padding="12,10" FontSize="14"/>
             
-            <!-- Remember Me -->
-            <CheckBox Content="Remember me" Foreground="{StaticResource BrushText}" Margin="0,0,0,24"/>
+            <!-- Display Name (Sign Up Only) -->
+            <StackPanel x:Name="DisplayNamePanel" Visibility="Collapsed" Margin="0,0,0,16">
+                <TextBlock Text="Display Name" Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
+                <TextBox x:Name="DisplayNameTextBox" Style="{StaticResource CustomTextBoxStyle}" Height="40" Padding="12,10" FontSize="14"/>
+            </StackPanel>
             
-            <!-- Login Button -->
-            <Button Content="Sign In" Style="{StaticResource PrimaryButtonStyle}" Height="44" Margin="0,0,0,12"/>
+            <!-- Remember Me (Sign In Only) -->
+            <CheckBox x:Name="RememberMeCheckbox" Content="Remember me" Foreground="{StaticResource BrushText}" Margin="0,0,0,24" Visibility="Visible"/>
+            
+            <!-- Primary Button -->
+            <Button x:Name="AuthButton" Content="Sign In" Style="{StaticResource PrimaryButtonStyle}" Height="44" Margin="0,0,0,12" Click="AuthButton_Click"/>
+            
+            <!-- Loading Indicator -->
+            <StackPanel x:Name="LoadingPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
+                <TextBlock Text="Loading..." Foreground="{StaticResource BrushText}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+            </StackPanel>
             
             <!-- Google Login -->
-            <Button Content="Sign in with Google" Height="44" Background="#333333" Foreground="{StaticResource BrushText}" Margin="0,0,0,12"/>
+            <Button x:Name="GoogleButton" Content="Sign in with Google" Height="44" Background="#333333" Foreground="{StaticResource BrushText}" Margin="0,0,0,12" Click="GoogleButton_Click" IsEnabled="False"/>
+            <TextBlock Text="(Coming Soon)" Foreground="{StaticResource BrushText}" Opacity="0.6" FontSize="11" HorizontalAlignment="Center" Margin="0,-8,0,12"/>
             
             <!-- Links -->
-            <TextBlock HorizontalAlignment="Center" Margin="0,16,0,0" Foreground="{StaticResource BrushText}">
-                <Run Text="Don't have an account? "/>
-                <Hyperlink Foreground="{StaticResource BrushPrimary}" TextDecorations="None">Sign up</Hyperlink>
+            <TextBlock HorizontalAlignment="Center" Margin="0,16,0,0" Foreground="{StaticResource BrushText}" x:Name="ToggleAuthLink">
+                <Run Text="Don't have an account? " x:Name="ToggleAuthText"/>
+                <Hyperlink Foreground="{StaticResource BrushPrimary}" TextDecorations="None" Click="ToggleAuth_Click">Sign up</Hyperlink>
             </TextBlock>
             
-            <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center">
-                <Hyperlink Foreground="{StaticResource BrushPrimary}" TextDecorations="">Forgot password?</Hyperlink>
+            <TextBlock x:Name="ForgotPasswordLink" Margin="0,8,0,0" HorizontalAlignment="Center" Visibility="Visible">
+                <Hyperlink Foreground="{StaticResource BrushPrimary}" TextDecorations="None" Click="ForgotPassword_Click">Forgot password?</Hyperlink>
             </TextBlock>
         </StackPanel>
     </Grid>

@@ -6,31 +6,102 @@
     Width="1200"
     WindowStartupLocation="CenterScreen"
     Background="{StaticResource BrushBackground}"
-    Foreground="{StaticResource BrushText}">
+    Foreground="{StaticResource BrushText}"
+    Loaded="Window_Loaded"
+    Closing="Window_Closing">
     
     <Grid>
-        <!-- Left Sidebar -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="300"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <!-- Top Navigation Bar -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         
-        <Border Background="{StaticResource BrushSurface}" Grid.Column="0" Padding="20">
-            <StackPanel>
-                <TextBlock Text="Chat History" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,16"/>
+        <Border Background="{StaticResource BrushSurface}" Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="#333333">
+            <Grid Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 
-                <!-- Placeholder Chat Items -->
-                <TextBlock Text="No chat history yet" Foreground="{StaticResource BrushText}" Opacity="0.6"/>
-            </StackPanel>
+                <!-- Title -->
+                <TextBlock Text="Netra AI Dashboard" Style="{StaticResource SubHeaderTextStyle}" VerticalAlignment="Center"/>
+                
+                <!-- User Menu -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="UserNameText" Foreground="{StaticResource BrushText}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    
+                    <!-- Settings Button -->
+                    <Button x:Name="SettingsButton" Content="⚙️" Background="Transparent" Foreground="{StaticResource BrushText}" 
+                           BorderThickness="0" Padding="8" Click="SettingsButton_Click" ToolTip="Settings"/>
+                    
+                    <!-- Logout Button -->
+                    <Button x:Name="LogoutButton" Content="Logout" Background="#ef4444" Foreground="White" 
+                           Padding="12,6" BorderThickness="0" Click="LogoutButton_Click" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
         </Border>
         
         <!-- Main Content -->
-        <Grid Grid.Column="1" Margin="20">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Welcome to Netra AI" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center"/>
-                <TextBlock Text="Start a conversation or capture your screen to get AI-powered insights" 
-                           Style="{StaticResource SubHeaderTextStyle}" TextAlignment="Center"/>
-            </StackPanel>
+        <Grid Grid.Row="1">
+            <!-- Left Sidebar -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Border Background="{StaticResource BrushSurface}" Grid.Column="0" Padding="20" BorderThickness="1,0,0,0" BorderBrush="#333333">
+                <StackPanel>
+                    <!-- Quick Actions -->
+                    <TextBlock Text="Quick Actions" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,16"/>
+                    
+                    <Button x:Name="CaptureButton" Content="📸 Capture Screen" Height="40" Background="{StaticResource BrushPrimary}" Foreground="White" 
+                           Margin="0,0,0,8" Click="CaptureButton_Click" FontSize="13" FontWeight="SemiBold"/>
+                    
+                    <Button x:Name="OverlayButton" Content="🪟 Show Overlay" Height="40" Background="#333333" Foreground="{StaticResource BrushText}" 
+                           Margin="0,0,0,16" Click="OverlayButton_Click" FontSize="13" FontWeight="SemiBold"/>
+                    
+                    <!-- Chat History -->
+                    <TextBlock Text="Chat History" Style="{StaticResource HeaderTextStyle}" Margin="0,24,0,16"/>
+                    <ListBox x:Name="ChatHistoryList" Background="Transparent" Foreground="{StaticResource BrushText}" 
+                            BorderThickness="0" Height="300">
+                        <ListBoxItem Content="No chat history yet" Foreground="{StaticResource BrushText}" Opacity="0.6" IsEnabled="False"/>
+                    </ListBox>
+                    
+                    <!-- Stats -->
+                    <TextBlock Text="Statistics" Style="{StaticResource HeaderTextStyle}" Margin="0,24,0,12"/>
+                    <StackPanel Margin="0,0,0,8">
+                        <TextBlock Text="Captures Today" Foreground="{StaticResource BrushText}" Opacity="0.8" FontSize="12"/>
+                        <TextBlock x:Name="CaptureCountText" Text="0" Foreground="{StaticResource BrushPrimary}" FontSize="20" FontWeight="Bold"/>
+                    </StackPanel>
+                    
+                    <StackPanel>
+                        <TextBlock Text="Questions Asked" Foreground="{StaticResource BrushText}" Opacity="0.8" FontSize="12"/>
+                        <TextBlock x:Name="QuestionCountText" Text="0" Foreground="{StaticResource BrushPrimary}" FontSize="20" FontWeight="Bold"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <!-- Main Content Area -->
+            <Grid Grid.Column="1" Margin="20">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Welcome Back!" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center"/>
+                    <TextBlock x:Name="WelcomeText" Text="" Style="{StaticResource SubHeaderTextStyle}" TextAlignment="Center" Margin="0,8,0,32"/>
+                    
+                    <Border Background="{StaticResource BrushSurface}" Padding="20" CornerRadius="8" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Getting Started" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,12"/>
+                            <TextBlock Text="1. Press Ctrl+Alt+S to capture your screen" Foreground="{StaticResource BrushText}" Margin="0,0,0,8"/>
+                            <TextBlock Text="2. The text will be extracted using OCR" Foreground="{StaticResource BrushText}" Margin="0,0,0,8"/>
+                            <TextBlock Text="3. Ask Netra AI for insights about what you captured" Foreground="{StaticResource BrushText}"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Status Message -->
+                    <TextBlock x:Name="StatusText" Text="Ready to capture! Press Ctrl+Alt+S or click 'Capture Screen'" 
+                              Foreground="{StaticResource BrushPrimary}" TextAlignment="Center" FontStyle="Italic"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
