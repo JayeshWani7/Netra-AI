@@ -1,6 +1,7 @@
 using NetraAI.Desktop.Utils;
 using NetraAI.Desktop.Views;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace NetraAI.Desktop.Services
 {
@@ -9,119 +10,70 @@ namespace NetraAI.Desktop.Services
     /// </summary>
     public class NavigationService
     {
-        private readonly Dictionary<string, Type> _viewMap = new();
         private readonly ILogger _logger;
-        private Window? _currentWindow;
+        private Window? _shellWindow;
+        private ContentControl? _contentHost;
 
         public NavigationService(ILogger logger)
         {
             _logger = logger;
-            RegisterViews();
+            _logger.Info("Navigation service initialized for single-window navigation");
         }
 
-        private void RegisterViews()
+        public void InitializeShell(Window shellWindow, ContentControl contentHost)
         {
-            _viewMap["Login"] = typeof(LoginWindow);
-            _viewMap["Permissions"] = typeof(PermissionsWindow);
-            _viewMap["Main"] = typeof(MainWindow);
-            _viewMap["Overlay"] = typeof(OverlayWindow);
-            
-            _logger.Info("Navigation service initialized with 4 registered views");
+            _shellWindow = shellWindow;
+            _contentHost = contentHost;
+            _logger.Info("Navigation shell initialized");
         }
 
         /// <summary>
-        /// Navigate to permissions window after successful login
+        /// Navigate to permissions view after successful login
         /// </summary>
-        public void NavigateToPermissions(Window fromWindow)
+        public void NavigateToPermissions(object? source = null)
         {
-            try
-            {
-                _logger.Info("Navigating to PermissionsWindow");
-                
-                var permissionsWindow = new PermissionsWindow();
-                permissionsWindow.Show();
-                Application.Current.MainWindow = permissionsWindow;
-                
-                // Close the current window
-                fromWindow.Close();
-                _currentWindow = permissionsWindow;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Navigation to Permissions failed: {ex.Message}", ex);
-            }
+            NavigateToView(new PermissionsWindow(), "Permissions");
         }
 
         /// <summary>
-        /// Navigate to main dashboard window
+        /// Navigate to main dashboard view
         /// </summary>
-        public void NavigateToMain(Window fromWindow)
+        public void NavigateToMain(object? source = null)
         {
-            try
-            {
-                _logger.Info("Navigating to MainWindow");
-                
-                var mainWindow = new MainWindow();
-                mainWindow.Show();
-                Application.Current.MainWindow = mainWindow;
-                
-                // Close the current window
-                fromWindow.Close();
-                _currentWindow = mainWindow;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Navigation to Main failed: {ex.Message}", ex);
-            }
+            NavigateToView(new MainWindow(), "Main");
         }
 
         /// <summary>
         /// Navigate back to login
         /// </summary>
-        public void NavigateToLogin(Window fromWindow)
+        public void NavigateToLogin(object? source = null)
         {
-            try
-            {
-                _logger.Info("Navigating back to LoginWindow");
-                
-                var loginWindow = new LoginWindow();
-                loginWindow.Show();
-                Application.Current.MainWindow = loginWindow;
-                
-                // Close the current window
-                fromWindow.Close();
-                _currentWindow = loginWindow;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Navigation to Login failed: {ex.Message}", ex);
-            }
+            NavigateToView(new LoginWindow(), "Login");
         }
 
         /// <summary>
-        /// Navigate to a specific window by name
+        /// Navigate to a specific view by name
         /// </summary>
-        public void NavigateTo(string windowName)
+        public void NavigateTo(string viewName)
         {
             try
             {
-                _logger.Info($"Navigating to: {windowName}");
-                
-                if (!_viewMap.ContainsKey(windowName))
-                {
-                    _logger.Warning($"Window '{windowName}' not registered");
-                    return;
-                }
+                _logger.Info($"Navigating to: {viewName}");
 
-                var windowType = _viewMap[windowName];
-                var window = (Window?)Activator.CreateInstance(windowType);
-                
-                if (window != null)
+                switch (viewName)
                 {
-                    window.Show();
-                    Application.Current.MainWindow = window;
-                    _currentWindow?.Close();
-                    _currentWindow = window;
+                    case "Login":
+                        NavigateToLogin();
+                        break;
+                    case "Permissions":
+                        NavigateToPermissions();
+                        break;
+                    case "Main":
+                        NavigateToMain();
+                        break;
+                    default:
+                        _logger.Warning($"View '{viewName}' not registered");
+                        break;
                 }
             }
             catch (Exception ex)
@@ -131,13 +83,14 @@ namespace NetraAI.Desktop.Services
         }
 
         /// <summary>
-        /// Close current window
+        /// Close current shell window
         /// </summary>
         public void CloseWindow()
         {
             _logger.Info("Closing current window");
-            _currentWindow?.Close();
-            _currentWindow = null;
+            _shellWindow?.Close();
+            _shellWindow = null;
+            _contentHost = null;
         }
 
         /// <summary>
@@ -145,7 +98,26 @@ namespace NetraAI.Desktop.Services
         /// </summary>
         public Window? GetCurrentWindow()
         {
-            return _currentWindow;
+            return _shellWindow;
+        }
+
+        private void NavigateToView(UserControl view, string viewName)
+        {
+            try
+            {
+                if (_contentHost == null)
+                {
+                    _logger.Warning("Navigation shell is not initialized");
+                    return;
+                }
+
+                _logger.Info($"Navigating to {viewName} view in shell");
+                _contentHost.Content = view;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Navigation to {viewName} failed: {ex.Message}", ex);
+            }
         }
     }
 }

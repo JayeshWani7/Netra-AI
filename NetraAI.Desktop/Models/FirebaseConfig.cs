@@ -28,6 +28,15 @@ namespace NetraAI.Desktop.Models
         [JsonProperty("MeasurementId")]
         public string? MeasurementId { get; set; }
 
+        [JsonProperty("GoogleClientId")]
+        public string? GoogleClientId { get; set; }
+
+        [JsonProperty("GoogleClientSecret")]
+        public string? GoogleClientSecret { get; set; }
+
+        [JsonProperty("GoogleRedirectUri")]
+        public string? GoogleRedirectUri { get; set; }
+
         public bool IsValid()
         {
             return !string.IsNullOrEmpty(ApiKey) &&
@@ -36,6 +45,11 @@ namespace NetraAI.Desktop.Models
                    !string.IsNullOrEmpty(StorageBucket) &&
                    !string.IsNullOrEmpty(MessagingSenderId) &&
                    !string.IsNullOrEmpty(AppId);
+        }
+
+        public bool IsGoogleAuthConfigured()
+        {
+            return !string.IsNullOrWhiteSpace(GoogleClientId);
         }
     }
 }

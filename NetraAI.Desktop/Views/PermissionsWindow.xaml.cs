@@ -9,7 +9,7 @@ namespace NetraAI.Desktop.Views
     /// <summary>
     /// Interaction logic for PermissionsWindow.xaml
     /// </summary>
-    public partial class PermissionsWindow : Window
+    public partial class PermissionsWindow : UserControl
     {
         private readonly PermissionService _permissionService;
         private readonly NavigationService _navigationService;

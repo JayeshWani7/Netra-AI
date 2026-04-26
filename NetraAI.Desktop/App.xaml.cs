@@ -3,6 +3,7 @@ using NetraAI.Desktop.Utils;
 using System.Diagnostics;
 using System.IO;
 using NetraAI.Desktop.Views;
+using NetraAI.Desktop.Services;
 
 namespace NetraAI.Desktop
 {
@@ -33,13 +34,18 @@ namespace NetraAI.Desktop
                 
                 logger.Info("Netra AI application started");
 
-                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] Creating LoginWindow\n");
-                var loginWindow = new LoginWindow();
-                MainWindow = loginWindow;
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] Creating ShellWindow\n");
+                var shellWindow = new ShellWindow();
+                MainWindow = shellWindow;
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
-                loginWindow.Show();
-                loginWindow.Activate();
-                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] LoginWindow shown\n");
+
+                var navigationService = ServiceProvider.GetRequiredService<NavigationService>();
+                navigationService.InitializeShell(shellWindow, shellWindow.GetContentHost());
+                navigationService.NavigateToLogin();
+
+                shellWindow.Show();
+                shellWindow.Activate();
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "netrai_startup.log"), $"[{DateTime.Now:HH:mm:ss.fff}] ShellWindow shown\n");
             }
             catch (Exception ex)
             {

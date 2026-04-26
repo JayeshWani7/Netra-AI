@@ -9,7 +9,7 @@ namespace NetraAI.Desktop.Views
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : UserControl
     {
         private readonly IAuthService _authService;
         private readonly NavigationService _navigationService;

@@ -8,18 +8,20 @@
                 <ResourceDictionary Source="Resources/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
-            <!-- Color Palette (Dark Theme) -->
-            <Color x:Key="ColorBackground">#1a1a1a</Color>
-            <Color x:Key="ColorSurface">#2d2d2d</Color>
-            <Color x:Key="ColorPrimary">#7c3aed</Color>
-            <Color x:Key="ColorText">#f0f0f0</Color>
-            <Color x:Key="ColorError">#ef4444</Color>
-            
-            <SolidColorBrush x:Key="BrushBackground" Color="#1a1a1a"/>
-            <SolidColorBrush x:Key="BrushSurface" Color="#2d2d2d"/>
-            <SolidColorBrush x:Key="BrushPrimary" Color="#7c3aed"/>
-            <SolidColorBrush x:Key="BrushText" Color="#f0f0f0"/>
-            <SolidColorBrush x:Key="BrushError" Color="#ef4444"/>
+            <!-- Monochrome Theme Palette -->
+            <Color x:Key="ColorBackground">#0A0A0A</Color>
+            <Color x:Key="ColorSurface">#141414</Color>
+            <Color x:Key="ColorPrimary">#F2F2F2</Color>
+            <Color x:Key="ColorText">#F4F4F4</Color>
+            <Color x:Key="ColorError">#B04A4A</Color>
+
+            <SolidColorBrush x:Key="BrushBackground" Color="#0A0A0A"/>
+            <SolidColorBrush x:Key="BrushSurface" Color="#141414"/>
+            <SolidColorBrush x:Key="BrushPrimary" Color="#F2F2F2"/>
+            <SolidColorBrush x:Key="BrushText" Color="#F4F4F4"/>
+            <SolidColorBrush x:Key="BrushMuted" Color="#9D9D9D"/>
+            <SolidColorBrush x:Key="BrushDivider" Color="#2A2A2A"/>
+            <SolidColorBrush x:Key="BrushError" Color="#B04A4A"/>
             
         </ResourceDictionary>
     </Application.Resources>

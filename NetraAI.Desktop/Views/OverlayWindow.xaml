@@ -11,41 +11,41 @@
     ShowInTaskbar="False"
     ResizeMode="CanResizeWithGrip">
     
-    <Border Background="{StaticResource BrushSurface}" CornerRadius="12" 
-            BorderBrush="#444444" BorderThickness="1" 
+    <Border Background="{StaticResource BrushSurface}" CornerRadius="14" 
+            BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" 
             Effect="{StaticResource ResourceKey=ShadowEffect}">
         
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
+                <RowDefinition Height="48"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="50"/>
+                <RowDefinition Height="64"/>
             </Grid.RowDefinitions>
             
             <!-- Title Bar -->
-            <Border Grid.Row="0" Background="{StaticResource BrushBackground}" CornerRadius="12,12,0,0" Padding="16">
+            <Border Grid.Row="0" Background="#101010" CornerRadius="14,14,0,0" Padding="14,10" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,0,0,1">
                 <Grid>
-                    <TextBlock Text="Netra AI Assistant" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <Button Content="×" HorizontalAlignment="Right" Background="Transparent" 
-                            Foreground="{StaticResource BrushText}" FontSize="18" Padding="0"/>
+                    <TextBlock Text="Netra AI Assistant" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                    <Button Content="Close" HorizontalAlignment="Right" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4"/>
                 </Grid>
             </Border>
             
             <!-- Chat Area -->
-            <ScrollViewer Grid.Row="1" Padding="16">
-                <TextBlock Text="Chat area - Ready to help!" Foreground="{StaticResource BrushText}" VerticalAlignment="Center" TextAlignment="Center"/>
+            <ScrollViewer Grid.Row="1" Padding="18">
+                <TextBlock Text="Overlay is ready. Captured context and AI responses will appear here." 
+                           Foreground="{StaticResource BrushMuted}" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
             </ScrollViewer>
             
             <!-- Input Area -->
-            <Border Grid.Row="2" Background="{StaticResource BrushBackground}" CornerRadius="0,0,12,12" Padding="16">
+            <Border Grid.Row="2" Background="#101010" CornerRadius="0,0,14,14" Padding="12" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,1,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
-                    <TextBox Grid.Column="0" Background="{StaticResource BrushSurface}" Foreground="{StaticResource BrushText}" Padding="12,8"/>
-                    <Button Grid.Column="1" Content="Send" Style="{StaticResource PrimaryButtonStyle}" Margin="8,0,0,0"/>
+                    <TextBox Grid.Column="0" Style="{StaticResource CustomTextBoxStyle}" Padding="12,8" Height="40" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="Send" Style="{StaticResource PrimaryButtonStyle}" Margin="10,0,0,0" Padding="16,8" Height="40" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
         </Grid>
@@ -53,6 +53,6 @@
     
     <!-- Shadow Effect Definition -->
     <Window.Resources>
-        <DropShadowEffect x:Key="ShadowEffect" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/>
+        <DropShadowEffect x:Key="ShadowEffect" BlurRadius="18" ShadowDepth="0" Opacity="0.35" Color="#000000"/>
     </Window.Resources>
 </Window>

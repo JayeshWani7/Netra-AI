@@ -1,0 +1,16 @@
+<Window x:Class="NetraAI.Desktop.Views.ShellWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Netra AI"
+    Height="760"
+    Width="1200"
+    MinHeight="700"
+    MinWidth="1100"
+    WindowStartupLocation="CenterScreen"
+    Background="{StaticResource BrushBackground}"
+    Foreground="{StaticResource BrushText}">
+
+    <Grid>
+        <ContentControl x:Name="ShellContentHost"/>
+    </Grid>
+</Window>

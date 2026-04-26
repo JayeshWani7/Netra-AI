@@ -11,7 +11,7 @@ namespace NetraAI.Desktop.Views
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
     /// </summary>
-    public partial class LoginWindow : Window
+    public partial class LoginWindow : UserControl
     {
         private readonly IAuthService _authService;
         private readonly NavigationService _navigationService;
@@ -30,6 +30,10 @@ namespace NetraAI.Desktop.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _logger.Info("LoginWindow loaded");
+            var firebaseConfig = ConfigurationManager.GetFirebaseConfig();
+            var googleConfigured = firebaseConfig?.IsGoogleAuthConfigured() == true;
+            GoogleButton.IsEnabled = googleConfigured;
+            GoogleConfigText.Visibility = googleConfigured ? Visibility.Collapsed : Visibility.Visible;
             EmailTextBox.Focus();
         }
 
@@ -153,8 +157,11 @@ namespace NetraAI.Desktop.Views
                 ForgotPasswordLink.Visibility = Visibility.Collapsed;
                 
                 SignUpTab.Background = (System.Windows.Media.Brush)FindResource("BrushPrimary");
-                SignUpTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushText");
+                SignUpTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushBackground");
+                SignUpTab.BorderBrush = (System.Windows.Media.Brush)FindResource("BrushPrimary");
                 SignInTab.Background = (System.Windows.Media.Brush)FindResource("BrushSurface") ?? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(68, 68, 68));
+                SignInTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushText");
+                SignInTab.BorderBrush = (System.Windows.Media.Brush)FindResource("BrushDivider");
             }
             else
             {
@@ -165,17 +172,48 @@ namespace NetraAI.Desktop.Views
                 ForgotPasswordLink.Visibility = Visibility.Visible;
                 
                 SignInTab.Background = (System.Windows.Media.Brush)FindResource("BrushPrimary");
-                SignInTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushText");
+                SignInTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushBackground");
+                SignInTab.BorderBrush = (System.Windows.Media.Brush)FindResource("BrushPrimary");
                 SignUpTab.Background = (System.Windows.Media.Brush)FindResource("BrushSurface") ?? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(68, 68, 68));
+                SignUpTab.Foreground = (System.Windows.Media.Brush)FindResource("BrushText");
+                SignUpTab.BorderBrush = (System.Windows.Media.Brush)FindResource("BrushDivider");
             }
 
             ClearError();
             ClearInputs();
         }
 
-        private void GoogleButton_Click(object sender, RoutedEventArgs e)
+        private async void GoogleButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowError("Google Sign-In is coming soon!");
+            try
+            {
+                SetLoading(true);
+                ClearError();
+
+                var user = await _authService.LoginWithGoogleAsync();
+                if (user != null)
+                {
+                    _logger.Info($"Google authentication successful for user: {user.UserId}");
+                    _navigationService.NavigateToPermissions(this);
+                    return;
+                }
+
+                ShowError("Google Sign-In failed. Please try again.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message);
+                _logger.Warning($"Google authentication error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                ShowError("Google Sign-In failed. Please try again.");
+                _logger.Error($"Google authentication error: {ex.Message}", ex);
+            }
+            finally
+            {
+                SetLoading(false);
+            }
         }
 
         private void ForgotPassword_Click(object sender, RoutedEventArgs e)
@@ -199,6 +237,7 @@ namespace NetraAI.Desktop.Views
         {
             LoadingPanel.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
             AuthButton.IsEnabled = !isLoading;
+            GoogleButton.IsEnabled = !isLoading && (ConfigurationManager.GetFirebaseConfig()?.IsGoogleAuthConfigured() == true);
             EmailTextBox.IsEnabled = !isLoading;
             PasswordBox.IsEnabled = !isLoading;
             DisplayNameTextBox.IsEnabled = !isLoading;

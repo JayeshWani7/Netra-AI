@@ -1,7 +1,11 @@
 using NetraAI.Desktop.Models;
 using NetraAI.Desktop.Utils;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Net.Http;
+using System.Net;
+using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace NetraAI.Desktop.Services
@@ -16,8 +20,13 @@ namespace NetraAI.Desktop.Services
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
         private readonly string _firebaseApiKey;
+        private readonly string _googleClientId;
+        private readonly string _googleClientSecret;
+        private readonly string _googleRedirectUri;
         private const string FirebaseAuthBaseUrl = "https://identitytoolkit.googleapis.com/v1";
         private const string FirebaseTokenRefreshUrl = "https://securetoken.googleapis.com/v1/token";
+        private const string GoogleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+        private const string GoogleTokenUrl = "https://oauth2.googleapis.com/token";
 
         public AuthService(ILogger logger)
         {
@@ -31,6 +40,9 @@ namespace NetraAI.Desktop.Services
             }
             
             _firebaseApiKey = firebaseConfig.ApiKey;
+            _googleClientId = firebaseConfig.GoogleClientId ?? string.Empty;
+            _googleClientSecret = firebaseConfig.GoogleClientSecret ?? string.Empty;
+            _googleRedirectUri = firebaseConfig.GoogleRedirectUri ?? string.Empty;
             _logger.Info("AuthService initialized with Firebase configuration");
         }
 
@@ -188,11 +200,54 @@ namespace NetraAI.Desktop.Services
             try
             {
                 _logger.Info("Attempting Google login");
-                // Note: Google Sign-In requires OAuth flow with browser/WebView integration
-                // This would require additional setup with Google OAuth configuration
-                _logger.Warning("Google Sign-In not yet implemented - requires OAuth flow setup");
-                
-                return null;
+
+                if (string.IsNullOrWhiteSpace(_googleClientId))
+                {
+                    throw new InvalidOperationException("Google Sign-In is not configured. Add Firebase:GoogleClientId in appsettings.json.");
+                }
+
+                var redirectUri = BuildRedirectUri();
+                var listenerPrefix = EnsureListenerPrefix(redirectUri);
+
+                var codeVerifier = GenerateCodeVerifier();
+                var codeChallenge = GenerateCodeChallenge(codeVerifier);
+                var state = Guid.NewGuid().ToString("N");
+
+                using var listener = new HttpListener();
+                listener.Prefixes.Add(listenerPrefix);
+                listener.Start();
+
+                var authUrl = BuildGoogleAuthorizationUrl(_googleClientId, redirectUri, codeChallenge, state);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = authUrl,
+                    UseShellExecute = true
+                });
+
+                _logger.Info("Opened browser for Google OAuth consent");
+
+                var code = await WaitForAuthorizationCodeAsync(listener, state);
+                var idToken = await ExchangeAuthorizationCodeForIdTokenAsync(code, codeVerifier, redirectUri);
+
+                if (string.IsNullOrWhiteSpace(idToken))
+                {
+                    throw new InvalidOperationException("Google authentication did not return an ID token.");
+                }
+
+                var firebaseUser = await SignInWithFirebaseGoogleAsync(idToken, redirectUri);
+                if (firebaseUser == null)
+                {
+                    _logger.Warning("Google login failed during Firebase token exchange");
+                    return null;
+                }
+
+                _currentUser = firebaseUser;
+                _logger.Info($"Google login successful for user: {_currentUser.Email} (ID: {_currentUser.UserId})");
+                return _currentUser;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -292,6 +347,245 @@ namespace NetraAI.Desktop.Services
                     ? "Signup failed. Please check details and try again."
                     : "Login failed. Please check your credentials and try again.";
             }
+        }
+
+        private async Task<User?> SignInWithFirebaseGoogleAsync(string googleIdToken, string redirectUri)
+        {
+            var url = $"{FirebaseAuthBaseUrl}/accounts:signInWithIdp?key={_firebaseApiKey}";
+            var postBody = $"id_token={Uri.EscapeDataString(googleIdToken)}&providerId=google.com";
+
+            var request = new
+            {
+                postBody,
+                requestUri = redirectUri,
+                returnSecureToken = true,
+                returnIdpCredential = true
+            };
+
+            var content = new StringContent(
+                JsonConvert.SerializeObject(request),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(url, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.Error($"Firebase Google sign-in failed: {response.StatusCode} - {errorContent}");
+                throw new InvalidOperationException("Google Sign-In failed in Firebase. Ensure Google provider is enabled in Firebase Auth.");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var authResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            if (authResponse == null)
+            {
+                return null;
+            }
+
+            return new User
+            {
+                UserId = authResponse["localId"]?.ToString() ?? string.Empty,
+                Email = authResponse["email"]?.ToString() ?? string.Empty,
+                DisplayName = authResponse["displayName"]?.ToString() ?? "Google User",
+                ProfilePictureUrl = authResponse["photoUrl"]?.ToString(),
+                AuthToken = authResponse["idToken"]?.ToString() ?? string.Empty,
+                RefreshToken = authResponse["refreshToken"]?.ToString() ?? string.Empty,
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow
+            };
+        }
+
+        private async Task<string> WaitForAuthorizationCodeAsync(HttpListener listener, string expectedState)
+        {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+            var contextTask = listener.GetContextAsync();
+            var timeoutTask = Task.Delay(Timeout.Infinite, timeoutCts.Token);
+            var completed = await Task.WhenAny(contextTask, timeoutTask);
+
+            if (completed != contextTask)
+            {
+                throw new InvalidOperationException("Google Sign-In timed out. Please try again.");
+            }
+
+            var context = await contextTask;
+            var queryParams = ParseQueryParams(context.Request.Url?.Query);
+
+            var responseHtml = "<html><body><h3>Authentication complete</h3><p>You can close this window and return to Netra AI.</p></body></html>";
+            var responseBytes = Encoding.UTF8.GetBytes(responseHtml);
+            context.Response.ContentType = "text/html";
+            context.Response.ContentLength64 = responseBytes.Length;
+            await context.Response.OutputStream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            context.Response.OutputStream.Close();
+
+            if (queryParams.TryGetValue("error", out var oauthError) && !string.IsNullOrWhiteSpace(oauthError))
+            {
+                throw new InvalidOperationException($"Google Sign-In canceled or failed: {oauthError}");
+            }
+
+            if (!queryParams.TryGetValue("state", out var returnedState) || returnedState != expectedState)
+            {
+                throw new InvalidOperationException("Invalid OAuth state. Please try Google Sign-In again.");
+            }
+
+            if (!queryParams.TryGetValue("code", out var code) || string.IsNullOrWhiteSpace(code))
+            {
+                throw new InvalidOperationException("Authorization code was not returned by Google.");
+            }
+
+            return code;
+        }
+
+        private async Task<string?> ExchangeAuthorizationCodeForIdTokenAsync(string code, string codeVerifier, string redirectUri)
+        {
+            var tokenBody = new Dictionary<string, string>
+            {
+                ["client_id"] = _googleClientId,
+                ["code"] = code,
+                ["code_verifier"] = codeVerifier,
+                ["grant_type"] = "authorization_code",
+                ["redirect_uri"] = redirectUri
+            };
+
+            if (!string.IsNullOrWhiteSpace(_googleClientSecret))
+            {
+                tokenBody["client_secret"] = _googleClientSecret;
+            }
+
+            using var tokenContent = new FormUrlEncodedContent(tokenBody);
+            var tokenResponse = await _httpClient.PostAsync(GoogleTokenUrl, tokenContent);
+
+            if (!tokenResponse.IsSuccessStatusCode)
+            {
+                var tokenErrorContent = await tokenResponse.Content.ReadAsStringAsync();
+                _logger.Error($"Google token exchange failed: {tokenResponse.StatusCode} - {tokenErrorContent}");
+                var tokenErrorMessage = GetGoogleTokenErrorMessage(tokenErrorContent);
+                throw new InvalidOperationException($"Google Sign-In token exchange failed: {tokenErrorMessage}");
+            }
+
+            var tokenResponseContent = await tokenResponse.Content.ReadAsStringAsync();
+            var tokenPayload = JsonConvert.DeserializeObject<dynamic>(tokenResponseContent);
+            return tokenPayload?["id_token"]?.ToString();
+        }
+
+        private static string BuildGoogleAuthorizationUrl(string clientId, string redirectUri, string codeChallenge, string state)
+        {
+            var queryParams = new Dictionary<string, string>
+            {
+                ["client_id"] = clientId,
+                ["redirect_uri"] = redirectUri,
+                ["response_type"] = "code",
+                ["scope"] = "openid email profile",
+                ["code_challenge"] = codeChallenge,
+                ["code_challenge_method"] = "S256",
+                ["state"] = state,
+                ["access_type"] = "offline",
+                ["prompt"] = "select_account"
+            };
+
+            var encoded = string.Join("&", queryParams.Select(kvp =>
+                $"{Uri.EscapeDataString(kvp.Key)}={Uri.EscapeDataString(kvp.Value)}"));
+
+            return $"{GoogleAuthUrl}?{encoded}";
+        }
+
+        private static string GenerateCodeVerifier()
+        {
+            var bytes = new byte[64];
+            RandomNumberGenerator.Fill(bytes);
+            return Base64UrlEncode(bytes);
+        }
+
+        private static string GenerateCodeChallenge(string codeVerifier)
+        {
+            var bytes = Encoding.ASCII.GetBytes(codeVerifier);
+            var hash = SHA256.HashData(bytes);
+            return Base64UrlEncode(hash);
+        }
+
+        private static string Base64UrlEncode(byte[] bytes)
+        {
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", string.Empty);
+        }
+
+        private static Dictionary<string, string> ParseQueryParams(string? query)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return result;
+            }
+
+            var trimmed = query.StartsWith("?") ? query[1..] : query;
+            var pairs = trimmed.Split('&', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var pair in pairs)
+            {
+                var parts = pair.Split('=', 2);
+                var key = Uri.UnescapeDataString(parts[0]);
+                var value = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : string.Empty;
+                result[key] = value;
+            }
+
+            return result;
+        }
+
+        private string BuildRedirectUri()
+        {
+            if (!string.IsNullOrWhiteSpace(_googleRedirectUri))
+            {
+                return EnsureRedirectUriFormat(_googleRedirectUri);
+            }
+
+            var redirectPort = GetAvailableTcpPort();
+            return $"http://127.0.0.1:{redirectPort}/";
+        }
+
+        private static string EnsureRedirectUriFormat(string uri)
+        {
+            return uri.EndsWith("/", StringComparison.Ordinal) ? uri : $"{uri}/";
+        }
+
+        private static string EnsureListenerPrefix(string redirectUri)
+        {
+            return redirectUri.EndsWith("/", StringComparison.Ordinal) ? redirectUri : $"{redirectUri}/";
+        }
+
+        private static string GetGoogleTokenErrorMessage(string errorContent)
+        {
+            try
+            {
+                var payload = JsonConvert.DeserializeObject<dynamic>(errorContent);
+                var error = payload?["error"]?.ToString();
+                var description = payload?["error_description"]?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(description))
+                {
+                    return description;
+                }
+
+                if (!string.IsNullOrWhiteSpace(error))
+                {
+                    return error;
+                }
+            }
+            catch
+            {
+                // Fall through to generic message.
+            }
+
+            return "Check OAuth client configuration.";
+        }
+
+        private static int GetAvailableTcpPort()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+            return port;
         }
     }
 }

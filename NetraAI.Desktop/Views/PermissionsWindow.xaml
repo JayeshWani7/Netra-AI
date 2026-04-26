@@ -1,104 +1,107 @@
-<Window x:Class="NetraAI.Desktop.Views.PermissionsWindow"
+<UserControl x:Class="NetraAI.Desktop.Views.PermissionsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Netra AI - Permissions"
-    Height="550"
-    Width="550"
-    WindowStartupLocation="CenterScreen"
     Background="{StaticResource BrushBackground}"
     Foreground="{StaticResource BrushText}"
-    ResizeMode="NoResize"
     Loaded="Window_Loaded">
-    
-    <Border Padding="40">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            
-            <StackPanel Grid.Row="0" VerticalAlignment="Top">
-                <TextBlock Text="App Permissions" Style="{StaticResource HeaderTextStyle}"/>
-                <TextBlock Text="To use Netra AI, we need your permission for:" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,24"/>
-                
-                <!-- Screen Access Permission -->
-                <Border Background="{StaticResource BrushSurface}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="📺 Screen Capture" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource BrushText}"/>
-                            <TextBlock Text="To see what's on your screen and provide context-aware assistance" 
-                                       Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="12"/>
-                        </StackPanel>
-                        
-                        <CheckBox x:Name="ScreenCaptureCheckbox" Grid.Column="1" VerticalAlignment="Center" IsChecked="True" Margin="12,0,0,0"/>
-                    </Grid>
-                </Border>
-                
-                <!-- Microphone Permission -->
-                <Border Background="{StaticResource BrushSurface}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="🎤 Microphone" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource BrushText}"/>
-                            <TextBlock Text="For voice input (optional)" 
-                                       Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="12"/>
-                        </StackPanel>
-                        
-                        <CheckBox x:Name="MicrophoneCheckbox" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" Margin="12,0,0,0"/>
-                    </Grid>
-                </Border>
-                
-                <!-- Background Running Permission -->
-                <Border Background="{StaticResource BrushSurface}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="⚙️ Background Execution" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource BrushText}"/>
-                            <TextBlock Text="To keep the app running in the background" 
-                                       Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="12"/>
-                        </StackPanel>
-                        
-                        <CheckBox x:Name="BackgroundCheckbox" Grid.Column="1" VerticalAlignment="Center" IsChecked="True" Margin="12,0,0,0"/>
-                    </Grid>
-                </Border>
-                
-                <!-- Clipboard Permission -->
-                <Border Background="{StaticResource BrushSurface}" CornerRadius="8" Padding="16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="📋 Clipboard Access" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource BrushText}"/>
-                            <TextBlock Text="To copy text and share results (optional)" 
-                                       Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="12"/>
-                        </StackPanel>
-                        
-                        <CheckBox x:Name="ClipboardCheckbox" Grid.Column="1" VerticalAlignment="Center" IsChecked="False" Margin="12,0,0,0"/>
-                    </Grid>
-                </Border>
-            </StackPanel>
-            
-            <!-- Buttons -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,32,0,0">
-                <Button x:Name="DenyAllButton" Content="Deny All" Height="40" Width="120" Background="#444444" Foreground="{StaticResource BrushText}" Margin="0,0,12,0" Click="DenyAllButton_Click"/>
-                <Button x:Name="GrantAllButton" Content="Grant All" Style="{StaticResource PrimaryButtonStyle}" Height="40" Width="120" Click="GrantAllButton_Click"/>
-            </StackPanel>
-        </Grid>
-    </Border>
-</Window>
+
+    <Grid Margin="56">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="PagePanel" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.35"/>
+                        <DoubleAnimation Storyboard.TargetName="PageShift" Storyboard.TargetProperty="Y" From="16" To="0" Duration="0:0:0.35"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <Border x:Name="PagePanel" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="18" Padding="36" Opacity="0">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="PageShift"/>
+            </Border.RenderTransform>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" VerticalAlignment="Top">
+                    <TextBlock Text="Permissions" FontSize="40" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Text="Review what Netra AI can access. You can change these settings later." Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,28"/>
+
+                    <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="◻" FontSize="16" Margin="0,2,14,0" Foreground="{StaticResource BrushText}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Screen Capture" FontSize="17" FontWeight="SemiBold"/>
+                                <TextBlock Text="Required to understand on-screen context and provide accurate assistance." Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="13"/>
+                            </StackPanel>
+                            <CheckBox x:Name="ScreenCaptureCheckbox" Grid.Column="2" VerticalAlignment="Center" IsChecked="True" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="◻" FontSize="16" Margin="0,2,14,0" Foreground="{StaticResource BrushText}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Microphone" FontSize="17" FontWeight="SemiBold"/>
+                                <TextBlock Text="Optional voice input for hands-free prompts and commands." Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="13"/>
+                            </StackPanel>
+                            <CheckBox x:Name="MicrophoneCheckbox" Grid.Column="2" VerticalAlignment="Center" IsChecked="False" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="◻" FontSize="16" Margin="0,2,14,0" Foreground="{StaticResource BrushText}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Background Execution" FontSize="17" FontWeight="SemiBold"/>
+                                <TextBlock Text="Keeps Netra AI available while you continue using other applications." Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="13"/>
+                            </StackPanel>
+                            <CheckBox x:Name="BackgroundCheckbox" Grid.Column="2" VerticalAlignment="Center" IsChecked="True" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="18">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="◻" FontSize="16" Margin="0,2,14,0" Foreground="{StaticResource BrushText}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Clipboard Access" FontSize="17" FontWeight="SemiBold"/>
+                                <TextBlock Text="Optional copy and paste support for faster sharing and output handling." Style="{StaticResource SubHeaderTextStyle}" Margin="0,4,0,0" FontSize="13"/>
+                            </StackPanel>
+                            <CheckBox x:Name="ClipboardCheckbox" Grid.Column="2" VerticalAlignment="Center" IsChecked="False" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,32,0,0">
+                    <Button x:Name="DenyAllButton" Content="Deny All" Style="{StaticResource SecondaryButtonStyle}" Height="44" Width="128" Margin="0,0,12,0" Click="DenyAllButton_Click"/>
+                    <Button x:Name="GrantAllButton" Content="Continue" Style="{StaticResource PrimaryButtonStyle}" Height="44" Width="128" Click="GrantAllButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
