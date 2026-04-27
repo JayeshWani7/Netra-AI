@@ -624,12 +624,12 @@ namespace NetraAI.Desktop.Services
 
                 if (!string.IsNullOrWhiteSpace(description))
                 {
-                    return description;
+                    return description!;
                 }
 
                 if (!string.IsNullOrWhiteSpace(error))
                 {
-                    return error;
+                    return error!;
                 }
             }
             catch
