@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Controls;
 using NetraAI.Desktop.Services;
 using NetraAI.Desktop.Utils;
-using NetraAI.Desktop.Models;
 
 namespace NetraAI.Desktop.Views
 {
@@ -46,9 +45,13 @@ namespace NetraAI.Desktop.Views
                 // In a real app, you would get this from the session/storage
                 // For now, we'll get it from properties or reload from auth
                 _logger.Info("Loading user information...");
-                
-                // Display welcome message
-                UserNameText.Text = "User";  // TODO: Get from session
+
+                var user = _authService.GetCurrentUser();
+                var displayName = !string.IsNullOrWhiteSpace(user?.DisplayName)
+                    ? user!.DisplayName
+                    : (!string.IsNullOrWhiteSpace(user?.Email) ? user!.Email : "User");
+
+                UserNameText.Text = displayName;
                 WelcomeText.Text = "Ready to capture and analyze your screen!";
                 
                 _logger.Info("User information loaded");
@@ -115,7 +118,7 @@ namespace NetraAI.Desktop.Views
             try
             {
                 _logger.Info("Settings button clicked");
-                MessageBox.Show("Settings window coming soon!", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+                _navigationService.NavigateToSettings(this);
             }
             catch (Exception ex)
             {
@@ -133,6 +136,14 @@ namespace NetraAI.Desktop.Views
                 {
                     _logger.Info("User initiated logout");
                     await _authService.LogoutAsync();
+
+                    var settingsService = ServiceProvider.GetRequiredService<SettingsService>();
+                    var config = settingsService.GetConfig();
+                    config.AuthToken = null;
+                    config.RefreshToken = null;
+                    config.RememberMe = false;
+                    config.LastUpdated = DateTime.UtcNow;
+                    await settingsService.SaveAsync(config);
                     
                     _logger.Info("Logout successful, navigating to login");
                     _navigationService.NavigateToLogin(this);

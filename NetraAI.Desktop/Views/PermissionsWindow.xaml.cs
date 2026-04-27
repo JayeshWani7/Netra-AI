@@ -42,8 +42,14 @@ namespace NetraAI.Desktop.Views
             try
             {
                 _logger.Info("Loading saved permissions...");
-                
-                // TODO: Load permissions from PermissionService
+                var loaded = _permissionService.LoadPermissionsAsync().GetAwaiter().GetResult();
+                if (loaded != null)
+                {
+                    ScreenCaptureCheckbox.IsChecked = loaded.ScreenAccess;
+                    MicrophoneCheckbox.IsChecked = loaded.MicrophoneAccess;
+                    BackgroundCheckbox.IsChecked = loaded.BackgroundRunning;
+                    ClipboardCheckbox.IsChecked = loaded.ClipboardAccess;
+                }
                 // For now, set defaults:
                 // - Screen Capture: required, checked by default
                 // - Microphone: optional, unchecked
@@ -58,25 +64,19 @@ namespace NetraAI.Desktop.Views
             }
         }
 
-        private void GrantAllButton_Click(object sender, RoutedEventArgs e)
+        private void ContinueButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                _logger.Info("Grant All clicked");
-                
-                // Grant all permissions
-                ScreenCaptureCheckbox.IsChecked = true;
-                MicrophoneCheckbox.IsChecked = true;
-                BackgroundCheckbox.IsChecked = true;
-                ClipboardCheckbox.IsChecked = true;
-                
+                _logger.Info("Save and continue clicked");
+
                 SavePermissions();
                 ProceedToMainWindow();
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error granting all permissions: {ex.Message}", ex);
-                MessageBox.Show("Error granting permissions", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _logger.Error($"Error saving permissions: {ex.Message}", ex);
+                MessageBox.Show("Error saving permissions", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -111,7 +111,7 @@ namespace NetraAI.Desktop.Views
                 var permissions = new Permission
                 {
                     PermissionId = Guid.NewGuid().ToString(),
-                    UserId = string.Empty, // TODO: Get from current user
+                    UserId = ServiceProvider.GetService<IAuthService>()?.GetCurrentUser()?.UserId ?? string.Empty,
                     ScreenAccess = ScreenCaptureCheckbox.IsChecked ?? false,
                     MicrophoneAccess = MicrophoneCheckbox.IsChecked ?? false,
                     BackgroundRunning = BackgroundCheckbox.IsChecked ?? false,
@@ -120,7 +120,7 @@ namespace NetraAI.Desktop.Views
                     IsExplicitlyRequested = true
                 };
                 
-                // TODO: Save permissions using PermissionService
+                _permissionService.SavePermissionsAsync(permissions).GetAwaiter().GetResult();
                 _logger.Info($"Permissions saved: Screen={permissions.ScreenAccess}, Mic={permissions.MicrophoneAccess}, Background={permissions.BackgroundRunning}, Clipboard={permissions.ClipboardAccess}");
             }
             catch (Exception ex)

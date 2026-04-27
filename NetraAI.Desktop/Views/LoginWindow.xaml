@@ -110,33 +110,33 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel x:Name="LeftPanel" Grid.Column="0" VerticalAlignment="Center" Opacity="0">
+            <StackPanel x:Name="LeftPanel" Grid.Column="0" VerticalAlignment="Center" Opacity="0" Margin="0,0,42,0">
                 <StackPanel.RenderTransform>
                     <TranslateTransform x:Name="LeftPanelShift"/>
                 </StackPanel.RenderTransform>
 
-                <TextBlock Text="Netra AI" FontSize="62" FontWeight="Bold" Foreground="{StaticResource BrushText}" Margin="0,0,0,20"/>
-                <TextBlock Text="A focused workspace for conversations, permissions, and AI-assisted workflows." TextWrapping="Wrap" Foreground="{StaticResource BrushMuted}" FontSize="18" LineHeight="28" MaxWidth="500" Margin="0,0,0,40"/>
+                <TextBlock Text="Netra AI" FontSize="62" FontWeight="Bold" Foreground="{StaticResource BrushText}" Margin="0,0,0,14"/>
+                <TextBlock Text="Desktop copilot for screen-aware answers and faster decisions." TextWrapping="Wrap" Foreground="{StaticResource BrushMuted}" FontSize="18" LineHeight="28" MaxWidth="520" Margin="0,0,0,36"/>
 
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-                        <Border Width="10" Height="10" CornerRadius="5" Background="{StaticResource BrushPrimary}" Margin="0,6,14,0"/>
-                        <TextBlock Text="Unified onboarding in one continuous interface" Foreground="{StaticResource BrushText}" FontSize="15"/>
+                        <Border Width="10" Height="10" CornerRadius="5" Background="#7A7A7A" Margin="0,6,14,0"/>
+                        <TextBlock Text="Capture screens and extract text instantly" Foreground="{StaticResource BrushText}" FontSize="15"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-                        <Border Width="10" Height="10" CornerRadius="5" Background="#8F8F8F" Margin="0,6,14,0"/>
-                        <TextBlock Text="Secure authentication with clean, distraction-free UI" Foreground="{StaticResource BrushText}" FontSize="15"/>
+                        <Border Width="10" Height="10" CornerRadius="5" Background="#7A7A7A" Margin="0,6,14,0"/>
+                        <TextBlock Text="Keep permissions transparent and device-based" Foreground="{StaticResource BrushText}" FontSize="15"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <Border Width="10" Height="10" CornerRadius="5" Background="#6F6F6F" Margin="0,6,14,0"/>
-                        <TextBlock Text="Minimal, professional layout with refined typography" Foreground="{StaticResource BrushText}" FontSize="15"/>
+                        <Border Width="10" Height="10" CornerRadius="5" Background="#7A7A7A" Margin="0,6,14,0"/>
+                        <TextBlock Text="Ask Netra AI for context and next actions" Foreground="{StaticResource BrushText}" FontSize="15"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
 
-            <Border x:Name="RightPanel" Grid.Column="1" Background="{StaticResource BrushSurface}" CornerRadius="18" Padding="42" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" Opacity="0">
+            <Border x:Name="RightPanel" Grid.Column="1" Background="{StaticResource BrushSurface}" CornerRadius="18" Padding="38" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" Opacity="0">
                 <Border.RenderTransform>
                     <TranslateTransform x:Name="RightPanelShift"/>
                 </Border.RenderTransform>
@@ -149,7 +149,7 @@
                         <TextBlock x:Name="ErrorMessage" Foreground="#F2DADA" TextWrapping="Wrap" FontSize="12"/>
                     </Border>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
                         <Button x:Name="SignInTab" Content="Sign In" Style="{StaticResource TabButtonStyle}" Background="{StaticResource BrushPrimary}" Foreground="{StaticResource BrushBackground}" BorderBrush="{StaticResource BrushPrimary}" Click="SignInTab_Click" Tag="signin"/>
                         <Button x:Name="SignUpTab" Content="Sign Up" Style="{StaticResource TabButtonStyle}" Margin="10,0,0,0" Background="Transparent" Foreground="{StaticResource BrushText}" BorderBrush="{StaticResource BrushDivider}" Click="SignUpTab_Click" Tag="signup"/>
                     </StackPanel>
@@ -160,20 +160,20 @@
                     <TextBlock Text="Password" Foreground="{StaticResource BrushText}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8"/>
                     <PasswordBox x:Name="PasswordBox" Margin="0,0,0,8" Height="42" Background="#101010" Foreground="{StaticResource BrushText}" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" Padding="14,10" FontSize="15"/>
 
-                    <StackPanel x:Name="DisplayNamePanel" Visibility="Collapsed" Margin="0,10,0,16">
+                    <StackPanel x:Name="DisplayNamePanel" Visibility="Collapsed" Margin="0,10,0,14">
                         <TextBlock Text="Display Name" Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="13" FontWeight="SemiBold"/>
                         <TextBox x:Name="DisplayNameTextBox" Style="{StaticResource CustomTextBoxStyle}" Height="42"/>
                     </StackPanel>
 
                     <CheckBox x:Name="RememberMeCheckbox" Content="Remember me" Foreground="{StaticResource BrushMuted}" Margin="0,0,0,22"/>
 
-                    <Button x:Name="AuthButton" Content="Sign In" Style="{StaticResource PrimaryButtonStyle}" Height="48" Margin="0,0,0,12" Click="AuthButton_Click"/>
+                    <Button x:Name="AuthButton" Content="Sign In" Style="{StaticResource PrimaryButtonStyle}" Height="48" Margin="0,0,0,10" Click="AuthButton_Click"/>
 
                     <StackPanel x:Name="LoadingPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,10" Visibility="Collapsed">
                         <TextBlock Text="Authenticating..." Foreground="{StaticResource BrushMuted}" FontSize="12" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <Button x:Name="GoogleButton" Content="Sign in with Google" Style="{StaticResource SecondaryButtonStyle}" Height="46" Click="GoogleButton_Click" IsEnabled="True"/>
+                    <Button x:Name="GoogleButton" Content="Sign in with Google" Style="{StaticResource SecondaryButtonStyle}" Height="46" Margin="0,0,0,6" Click="GoogleButton_Click" IsEnabled="True"/>
                     <TextBlock x:Name="GoogleConfigText" Text="Google Sign-In not configured" Foreground="{StaticResource BrushMuted}" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0" Visibility="Collapsed"/>
 
                     <Border Height="1" Background="{StaticResource BrushDivider}" Margin="0,22,0,16"/>

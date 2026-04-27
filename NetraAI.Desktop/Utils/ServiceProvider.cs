@@ -30,6 +30,7 @@ namespace NetraAI.Desktop.Utils
 
                     // Register services
                     services.AddSingleton<IAuthService, AuthService>();
+                    services.AddSingleton<SettingsService>();
                     services.AddSingleton<PermissionService>();
                     services.AddSingleton<NavigationService>();
 

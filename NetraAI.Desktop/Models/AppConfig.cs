@@ -13,6 +13,18 @@ namespace NetraAI.Desktop.Models
         [JsonProperty("auth_token")]
         public string? AuthToken { get; set; }
 
+        [JsonProperty("refresh_token")]
+        public string? RefreshToken { get; set; }
+
+        [JsonProperty("email")]
+        public string? Email { get; set; }
+
+        [JsonProperty("display_name")]
+        public string? DisplayName { get; set; }
+
+        [JsonProperty("remember_me")]
+        public bool RememberMe { get; set; } = false;
+
         [JsonProperty("theme")]
         public string Theme { get; set; } = "dark";
 

@@ -33,6 +33,11 @@ namespace NetraAI.Desktop.Services
         User? GetCurrentUser();
 
         /// <summary>
+        /// Restore an existing session without re-authentication
+        /// </summary>
+        void RestoreSession(User user);
+
+        /// <summary>
         /// Check if user is authenticated
         /// </summary>
         bool IsAuthenticated();

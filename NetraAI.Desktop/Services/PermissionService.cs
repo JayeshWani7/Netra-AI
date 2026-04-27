@@ -28,7 +28,7 @@ namespace NetraAI.Desktop.Services
         /// <summary>
         /// Load permissions from storage
         /// </summary>
-        public async Task<Permission?> LoadPermissionsAsync(string userId)
+        public async Task<Permission?> LoadPermissionsAsync()
         {
             try
             {

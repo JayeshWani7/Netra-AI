@@ -44,6 +44,14 @@ namespace NetraAI.Desktop.Services
         }
 
         /// <summary>
+        /// Navigate to settings view
+        /// </summary>
+        public void NavigateToSettings(object? source = null)
+        {
+            NavigateToView(new SettingsWindow(), "Settings");
+        }
+
+        /// <summary>
         /// Navigate back to login
         /// </summary>
         public void NavigateToLogin(object? source = null)
@@ -70,6 +78,9 @@ namespace NetraAI.Desktop.Services
                         break;
                     case "Main":
                         NavigateToMain();
+                        break;
+                    case "Settings":
+                        NavigateToSettings();
                         break;
                     default:
                         _logger.Warning($"View '{viewName}' not registered");

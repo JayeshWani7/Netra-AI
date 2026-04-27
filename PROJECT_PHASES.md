@@ -214,71 +214,104 @@ public class AuthService : IAuthService
 ```csharp
 public class Permission
 {
-    public string PermissionId { get; set; }
-    public string UserId { get; set; }
-    public bool ScreenAccess { get; set; }
-    public bool MicrophoneAccess { get; set; }
-    public bool BackgroundRunning { get; set; }
-    public bool ClipboardAccess { get; set; }
-    public DateTime GrantedAt { get; set; }
-    public bool IsExplicitlyRequested { get; set; }
+        public string PermissionId { get; set; }
+        public string UserId { get; set; }
+        public bool ScreenAccess { get; set; }
+        public bool MicrophoneAccess { get; set; }
+        public bool BackgroundRunning { get; set; }
+        public bool ClipboardAccess { get; set; }
+        public DateTime GrantedAt { get; set; }
+        public bool IsExplicitlyRequested { get; set; }
 }
 ```
 
 **Storage:**
-- [ ] Store in local JSON: `%AppData%/NetraAI/permissions.json`
+- [x] Store in local JSON: `%AppData%/NetraAI/permissions.json` (implemented via `PermissionService`)
 - [ ] Sync with cloud (optional)
+
+**Notes:** `Permission` model and `PermissionService` persist permissions to `%AppData%/NetraAI/permissions.json` using `JsonHelper`.
 
 ### 1.5 Basic Settings Management
 **Deliverable:** Settings system
 
 **Requirements:**
-- [ ] Store app settings locally
-- [ ] Store user preferences (theme, hotkey, etc.)
-- [ ] Settings file format: JSON
-- [ ] Default values defined
-- [ ] Settings accessible via `AppConfig` class
+- [ ] Store app settings locally (AppConfig model exists; persistence helper present but no centralized SettingsService yet)
+- [x] Store user preferences (theme, hotkey, etc.) — represented in `AppConfig` defaults
+- [x] Settings file format: JSON (`AppConfig` + `JsonHelper`)
+- [x] Default values defined in `AppConfig`
+- [x] Settings accessible via `AppConfig` class
 
 **Settings Structure:**
 ```json
 {
-  "user_id": "",
-  "auth_token": "",
-  "theme": "dark",
-  "hotkey": "Ctrl+Alt+A",
-  "auto_start": false,
-  "permissions": {
-    "screen_access": false,
-    "mic_access": false,
-    "background_running": false
-  }
+    "user_id": "",
+    "auth_token": "",
+    "theme": "dark",
+    "hotkey": "Ctrl+Alt+A",
+    "auto_start": false,
+    "permissions": {
+        "screen_access": false,
+        "mic_access": false,
+        "background_running": false
+    }
 }
 ```
+
+**Notes:** `AppConfig` is implemented at [NetraAI.Desktop/Models/AppConfig.cs](NetraAI.Desktop/Models/AppConfig.cs#L1-L120). `JsonHelper` provides serialization helpers, but there is currently no dedicated `SettingsService` that automatically reads/writes `%AppData%/NetraAI/settings.json` — this is a small implementation gap to add.
 
 ### 1.6 Logging System
 **Deliverable:** Application logging
 
-- [ ] Create `Logger.cs` utility
-- [ ] Log to file: `%AppData%/NetraAI/logs/`
-- [ ] Include timestamp, log level, message
-- [ ] Rotate logs (keep last 7 days)
+- [x] Create `Logger.cs` utility
+- [x] Log to file: `%AppData%/NetraAI/logs/`
+- [x] Include timestamp, log level, message
+- [x] Rotate logs (keep last 7 days)
+
+**Notes:** Logging uses Serilog via `NetraAI.Desktop/Utils/Logger.cs` and constants in `NetraAI.Desktop/Utils/Constants.cs` for paths and retention. Logger is initialized at app startup in `App.xaml.cs`.
 
 ### 1.7 NuGet Dependencies
 **Deliverable:** All required packages installed
 
+Current packages in `NetraAI.Desktop.csproj` (installed and used):
+
 ```
-FirebaseAuthentication.CSharp (Latest)
-Newtonsoft.Json (13.0.1+)
-log4net (2.0.14+)
+Firebase.Auth
+Newtonsoft.Json (13.0.+)
+Serilog (+ Serilog.Sinks.File, Serilog.Sinks.Debug)
+Microsoft.Extensions.DependencyInjection
+Microsoft.Extensions.Configuration + JSON binder
+Tesseract (OCR)
+Dapper
+System.Data.SQLite
 ```
+
+**Notes:** The project uses `Serilog` (not `log4net`) and `Firebase.Auth` package. Update the doc checklist to reflect actual packages above.
 
 ### 1.8 Code Architecture
 **Deliverable:** Clean, testable structure
 
-- [ ] MVVM pattern ready (no code-behind, or minimal)
-- [ ] Dependency injection container (SimpleInjector or similar)
-- [ ] Unit test project created
-- [ ] Interface-based services for testability
+- [x] MVVM pattern prepared (Views in place; some code-behind exists for navigation and wiring)
+- [x] Dependency injection container present (`ServiceProvider` using `Microsoft.Extensions.DependencyInjection`)
+- [x] Unit test project exists (`NetraAI.Tests`) with initial tests
+- [x] Interface-based services for testability (`IAuthService` implemented)
+
+**Notes:** DI is configured in `NetraAI.Desktop/Utils/ServiceProvider.cs`. `IAuthService` + `AuthService` provide an example of interface-based design. Unit tests in `NetraAI.Tests` exist and use `Moq`/`xUnit`, but several tests are placeholders and need expansion for coverage goals.
+
+### Implementation Check (1.1 → 1.8)
+- **1.1 Project Structure:** Present and matches planned layout. See repository root and [NetraAI.Desktop](NetraAI.Desktop/NetraAI.Desktop.csproj#L1-L20).
+- **1.2 Firebase Setup:** Configuration is read from `appsettings.json` via `ConfigurationManager` and used by `AuthService`. Ensure your Firebase keys are set in local `appsettings.json` (excluded from git). See `NetraAI.Desktop/Utils/ConfigurationManager.cs` and `NetraAI.Desktop/Services/AuthService.cs`.
+- **1.3 Login UI:** Login window and navigation exist (`Views/LoginWindow.xaml` & `NavigationService`). Basic UI wired; UX polishing optional.
+- **1.4 Permission Model:** Implemented (`NetraAI.Desktop/Models/Permission.cs`, `NetraAI.Desktop/Services/PermissionService.cs`).
+- **1.5 Settings Management:** `AppConfig` + `JsonHelper` exist, but no `SettingsService` to persist `settings.json` to `%AppData%` yet — recommend adding `SettingsService.Save()` and `Load()` wrappers using `JsonHelper.SerializeToFile`/`DeserializeFromFile`.
+- **1.6 Logging:** Implemented with Serilog; initialized at startup (`App.xaml.cs`).
+- **1.7 NuGet Dependencies:** Project uses Serilog + Firebase.Auth + Tesseract + others; update docs to reflect installed packages.
+- **1.8 Code Architecture:** DI and test project present; some tests placeholder. MVVM wiring present but not strict (there is code-behind for view initialization).
+
+**Recommended next actions:**
+- Add a small `SettingsService` to read/write `%AppData%/NetraAI/settings.json` using `JsonHelper` (2–4 files changes).
+- Implement `AuthService.RefreshTokenAsync` and `RequestPasswordResetAsync` (small TODOs inside `AuthService.cs`).
+- Expand unit tests to cover `AuthService` behaviors (use HTTP mocks) and `PermissionService` persistence.
+
 
 ### 1.9 CI/CD Setup (Optional but recommended)
 **Deliverable:** Automated build pipeline

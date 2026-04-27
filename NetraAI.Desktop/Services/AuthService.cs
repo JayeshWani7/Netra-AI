@@ -281,6 +281,11 @@ namespace NetraAI.Desktop.Services
             return _currentUser;
         }
 
+        public void RestoreSession(User user)
+        {
+            _currentUser = user;
+        }
+
         public bool IsAuthenticated()
         {
             return _currentUser != null && !string.IsNullOrEmpty(_currentUser.AuthToken);
@@ -291,8 +296,43 @@ namespace NetraAI.Desktop.Services
             try
             {
                 _logger.Info("Refreshing authentication token");
-                // TODO: Implement Firebase token refresh
-                await Task.Delay(100); // Placeholder
+                if (_currentUser == null || string.IsNullOrWhiteSpace(_currentUser.RefreshToken))
+                {
+                    _logger.Warning("No refresh token available for current user");
+                    return false;
+                }
+
+                var url = $"{FirebaseTokenRefreshUrl}?key={_firebaseApiKey}";
+                var body = new Dictionary<string, string>
+                {
+                    ["grant_type"] = "refresh_token",
+                    ["refresh_token"] = _currentUser.RefreshToken
+                };
+
+                var content = new FormUrlEncodedContent(body);
+                var response = await _httpClient.PostAsync(url, content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var err = await response.Content.ReadAsStringAsync();
+                    _logger.Error($"Token refresh failed: {response.StatusCode} - {err}");
+                    return false;
+                }
+
+                var respContent = await response.Content.ReadAsStringAsync();
+                var payload = JsonConvert.DeserializeObject<dynamic>(respContent);
+                var newIdToken = payload?["id_token"]?.ToString();
+                var newRefresh = payload?["refresh_token"]?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(newIdToken))
+                {
+                    _currentUser.AuthToken = newIdToken;
+                }
+                if (!string.IsNullOrWhiteSpace(newRefresh))
+                {
+                    _currentUser.RefreshToken = newRefresh;
+                }
+
+                _logger.Info("Authentication token refreshed successfully");
                 return true;
             }
             catch (Exception ex)
@@ -307,8 +347,29 @@ namespace NetraAI.Desktop.Services
             try
             {
                 _logger.Info($"Password reset requested for: {email}");
-                // TODO: Implement Firebase password reset
-                await Task.Delay(100); // Placeholder
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    _logger.Warning("Password reset requested with empty email");
+                    return false;
+                }
+
+                var url = $"{FirebaseAuthBaseUrl}/accounts:sendOobCode?key={_firebaseApiKey}";
+                var request = new
+                {
+                    requestType = "PASSWORD_RESET",
+                    email = email
+                };
+
+                var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(url, content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var err = await response.Content.ReadAsStringAsync();
+                    _logger.Error($"Password reset request failed: {response.StatusCode} - {err}");
+                    return false;
+                }
+
+                _logger.Info("Password reset email sent (if the email exists in Firebase)");
                 return true;
             }
             catch (Exception ex)
