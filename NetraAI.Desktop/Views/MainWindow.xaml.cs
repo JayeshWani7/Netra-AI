@@ -13,6 +13,7 @@ namespace NetraAI.Desktop.Views
         private readonly IAuthService _authService;
         private readonly NavigationService _navigationService;
         private readonly ILogger _logger;
+        private OverlayWindow? _overlayWindow;
 
         public MainWindow()
         {
@@ -89,27 +90,23 @@ namespace NetraAI.Desktop.Views
         {
             try
             {
-                _logger.Info("Capture button clicked");
-                StatusText.Text = "Capture functionality coming in Phase 2...";
-                MessageBox.Show("Screen capture functionality will be implemented in Phase 2!", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Capture button error: {ex.Message}", ex);
-            }
-        }
+                _logger.Info("Start Netra button clicked");
 
-        private void OverlayButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                _logger.Info("Overlay button clicked");
-                StatusText.Text = "Overlay functionality coming in Phase 4...";
-                MessageBox.Show("Floating overlay will be implemented in Phase 4!", "Coming Soon", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (_overlayWindow == null)
+                {
+                    _overlayWindow = new OverlayWindow();
+                    _overlayWindow.Closed += (_, _) => _overlayWindow = null;
+                }
+
+                _overlayWindow.ToggleHidden();
+                StatusText.Text = _overlayWindow.IsHidden
+                    ? "Overlay hidden (not visible on screen share)."
+                    : "Overlay visible. Drag it anywhere on screen.";
             }
             catch (Exception ex)
             {
-                _logger.Error($"Overlay button error: {ex.Message}", ex);
+                _logger.Error($"Start Netra button error: {ex.Message}", ex);
+                MessageBox.Show($"Unable to open the overlay.\n\n{ex}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

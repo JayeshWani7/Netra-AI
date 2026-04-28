@@ -2,57 +2,76 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Netra AI"
-    Height="500"
-    Width="400"
+    Height="520"
+    Width="420"
     WindowStyle="None"
     AllowsTransparency="True"
     Background="Transparent"
     Topmost="True"
     ShowInTaskbar="False"
-    ResizeMode="CanResizeWithGrip">
+    ResizeMode="NoResize">
     
-    <Border Background="{StaticResource BrushSurface}" CornerRadius="14" 
-            BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" 
-            Effect="{StaticResource ResourceKey=ShadowEffect}">
+        <Border x:Name="RootBorder" Background="{StaticResource BrushSurface}" CornerRadius="14" 
+            BorderBrush="{StaticResource BrushDivider}" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.35" Color="#000000"/>
+            </Border.Effect>
         
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="48"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="64"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <!-- Title Bar -->
-            <Border Grid.Row="0" Background="#101010" CornerRadius="14,14,0,0" Padding="14,10" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,0,0,1">
-                <Grid>
-                    <TextBlock Text="Netra AI Assistant" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
-                    <Button Content="Close" HorizontalAlignment="Right" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4"/>
-                </Grid>
-            </Border>
-            
-            <!-- Chat Area -->
-            <ScrollViewer Grid.Row="1" Padding="18">
-                <TextBlock Text="Overlay is ready. Captured context and AI responses will appear here." 
-                           Foreground="{StaticResource BrushMuted}" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-            </ScrollViewer>
-            
-            <!-- Input Area -->
-            <Border Grid.Row="2" Background="#101010" CornerRadius="0,0,14,14" Padding="12" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,1,0,0">
+            <Border x:Name="DragHandle" Grid.Row="0" Background="#101010" CornerRadius="14,14,0,0" Padding="14,10" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,0,0,1" MouseLeftButtonDown="DragHandle_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <TextBox Grid.Column="0" Style="{StaticResource CustomTextBoxStyle}" Padding="12,8" Height="40" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Content="Send" Style="{StaticResource PrimaryButtonStyle}" Margin="10,0,0,0" Padding="16,8" Height="40" VerticalAlignment="Center"/>
+
+                    <TextBlock Text="Netra AI" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button x:Name="ToggleButton" Content="Hide" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4" Margin="0,0,8,0" Click="ToggleButton_Click"/>
+                        <Button x:Name="CloseButton" Content="Close" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4" Click="CloseButton_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Chat Area -->
+            <ScrollViewer Grid.Row="1" Padding="18">
+                <StackPanel>
+                    <TextBox x:Name="ResponseText" Text="Overlay is ready. Captured context and AI responses will appear here."
+                             Background="Transparent" BorderThickness="0" Foreground="{StaticResource BrushMuted}"
+                             TextWrapping="Wrap" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled"/>
+                    <TextBlock x:Name="StatusText" Text="" Foreground="{StaticResource BrushMuted}" FontStyle="Italic" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+            
+            <!-- Input Area -->
+            <Border Grid.Row="2" Background="#101010" CornerRadius="0,0,14,14" Padding="12" BorderBrush="{StaticResource BrushDivider}" BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="UseScreenButton" Grid.Row="0" Grid.Column="0" Content="Use Screen" Style="{StaticResource SecondaryButtonStyle}"
+                            Opacity="0.75" Padding="12,6" HorizontalAlignment="Left" Margin="0,0,0,10" Click="UseScreenButton_Click"/>
+
+                    <TextBox x:Name="PromptTextBox" Grid.Row="1" Grid.Column="0" Style="{StaticResource CustomTextBoxStyle}" Padding="12,8" Height="40" VerticalAlignment="Center"/>
+                    <Button x:Name="SendButton" Grid.Row="1" Grid.Column="1" Content="Send" Style="{StaticResource PrimaryButtonStyle}" Margin="10,0,0,0" Padding="16,8" Height="40" VerticalAlignment="Center" Click="SendButton_Click"/>
                 </Grid>
             </Border>
         </Grid>
     </Border>
     
-    <!-- Shadow Effect Definition -->
     <Window.Resources>
-        <DropShadowEffect x:Key="ShadowEffect" BlurRadius="18" ShadowDepth="0" Opacity="0.35" Color="#000000"/>
     </Window.Resources>
 </Window>
