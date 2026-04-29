@@ -27,6 +27,7 @@ namespace NetraAI.Desktop.Utils
         public const string SettingsFileName = "settings.json";
         public const string PermissionsFileName = "permissions.json";
         public const string ChatHistoryFileName = "chat_history.db";
+        public const string ChatHistoryFolderName = "chat_history";
 
         // URLs
         public const string FirebaseProjectUrl = "YOUR_FIREBASE_PROJECT_URL";
@@ -41,6 +42,7 @@ namespace NetraAI.Desktop.Utils
         // Sizes
         public const int MaxScreenshotCacheSize = 50;
         public const int MaxChatHistorySessions = 100;
+        public const int MaxChatHistoryMessages = 500;
         public const long MaxLogFileSizeMB = 10;
 
         // Logging

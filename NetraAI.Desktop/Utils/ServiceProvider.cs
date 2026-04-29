@@ -33,6 +33,7 @@ namespace NetraAI.Desktop.Utils
                     services.AddSingleton<SettingsService>();
                     services.AddSingleton<PermissionService>();
                     services.AddSingleton<NavigationService>();
+                    services.AddSingleton<ChatHistoryService>();
 
                     _provider = services.BuildServiceProvider();
 

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using NetraAI.Desktop.Models;
 using NetraAI.Desktop.Services;
 using NetraAI.Desktop.Utils;
 
@@ -21,6 +22,8 @@ namespace NetraAI.Desktop.Views
         private readonly ScreenCaptureService _screenCaptureService;
         private readonly GeminiService _geminiService;
         private readonly ILogger _logger;
+        private readonly IAuthService _authService;
+        private readonly ChatHistoryService _chatHistoryService;
         private byte[]? _attachedScreenshotPng;
 
         public OverlayWindow()
@@ -29,6 +32,8 @@ namespace NetraAI.Desktop.Views
             _screenCaptureService = new ScreenCaptureService();
             _geminiService = new GeminiService();
             _logger = Logger.GetInstance();
+            _authService = ServiceProvider.GetRequiredService<IAuthService>();
+            _chatHistoryService = ServiceProvider.GetRequiredService<ChatHistoryService>();
         }
 
         public void ToggleHidden()
@@ -131,15 +136,59 @@ namespace NetraAI.Desktop.Views
                 UseScreenButton.IsEnabled = false;
                 StatusText.Text = "Sending to Gemini...";
 
+                var user = _authService.GetCurrentUser();
+                var userId = user?.UserId ?? "anonymous";
+                var promptForHistory = string.IsNullOrWhiteSpace(prompt)
+                    ? "Describe what is on my screen."
+                    : prompt;
+
+                var userMessage = new ChatMessage
+                {
+                    UserId = userId,
+                    Role = "user",
+                    Content = promptForHistory,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                await _chatHistoryService.AppendMessagesAsync(userId, new[] { userMessage });
+
                 var response = await _geminiService.GenerateAsync(prompt, _attachedScreenshotPng, CancellationToken.None);
                 ResponseText.Text = response.Trim();
                 StatusText.Text = "Done.";
                 _attachedScreenshotPng = null;
+                PromptTextBox.Text = string.Empty;
+
+                var assistantMessage = new ChatMessage
+                {
+                    UserId = userId,
+                    Role = "assistant",
+                    Content = ResponseText.Text,
+                    Timestamp = DateTime.UtcNow,
+                    Model = ConfigurationManager.GetValue("Gemini:Model")
+                };
+
+                await _chatHistoryService.AppendMessagesAsync(userId, new[] { assistantMessage });
             }
             catch (Exception ex)
             {
                 _logger.Error($"Send failed: {ex.Message}", ex);
                 StatusText.Text = $"Failed: {ex.Message}";
+
+                var user = _authService.GetCurrentUser();
+                var userId = user?.UserId ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    var errorMessage = new ChatMessage
+                    {
+                        UserId = userId,
+                        Role = "assistant",
+                        Content = $"Error: {ex.Message}",
+                        Timestamp = DateTime.UtcNow,
+                        Model = ConfigurationManager.GetValue("Gemini:Model")
+                    };
+
+                    await _chatHistoryService.AppendMessagesAsync(userId, new[] { errorMessage });
+                }
             }
             finally
             {

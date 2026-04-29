@@ -46,7 +46,7 @@
                     <Border Height="1" Background="{StaticResource BrushDivider}" Margin="0,0,0,16"/>
 
                     <TextBlock Text="Chat History" FontSize="21" FontWeight="Bold" Margin="0,0,0,12"/>
-                    <ListBox x:Name="ChatHistoryList" Background="Transparent" Foreground="{StaticResource BrushText}" BorderThickness="0" Height="250">
+                    <ListBox x:Name="ChatHistoryList" Background="Transparent" Foreground="{StaticResource BrushText}" BorderThickness="0" SelectionChanged="ChatHistoryList_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
                         <ListBoxItem Content="No chat history yet" Foreground="{StaticResource BrushMuted}" IsEnabled="False"/>
                     </ListBox>
 
@@ -66,21 +66,43 @@
             </Border>
 
             <Border Grid.Column="1" Margin="18,0,0,0" Background="{StaticResource BrushSurface}" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="14" Padding="34">
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Welcome back" FontSize="46" FontWeight="Bold" Margin="0,0,0,8"/>
-                    <TextBlock x:Name="WelcomeText" Text="" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,26"/>
+                <Grid>
+                    <StackPanel x:Name="WelcomePanel" VerticalAlignment="Center">
+                        <TextBlock Text="Welcome back" FontSize="46" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock x:Name="WelcomeText" Text="" Style="{StaticResource SubHeaderTextStyle}" Margin="0,0,0,26"/>
 
-                    <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,0,0,18">
-                        <StackPanel>
-                            <TextBlock Text="Getting Started" FontSize="24" FontWeight="Bold" Margin="0,0,0,12"/>
-                            <TextBlock Text="1. Use Ctrl+Alt+S to capture your screen." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
-                            <TextBlock Text="2. OCR extracts visible text from the capture." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
-                            <TextBlock Text="3. Ask Netra AI for context and next actions." Foreground="{StaticResource BrushText}" FontSize="15"/>
-                        </StackPanel>
-                    </Border>
+                        <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,0,0,18">
+                            <StackPanel>
+                                <TextBlock Text="Getting Started" FontSize="24" FontWeight="Bold" Margin="0,0,0,12"/>
+                                <TextBlock Text="1. Use Ctrl+Alt+S to capture your screen." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
+                                <TextBlock Text="2. OCR extracts visible text from the capture." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
+                                <TextBlock Text="3. Ask Netra AI for context and next actions." Foreground="{StaticResource BrushText}" FontSize="15"/>
+                            </StackPanel>
+                        </Border>
 
-                    <TextBlock x:Name="StatusText" Text="Ready to capture. Use keyboard shortcut or the action button." Foreground="{StaticResource BrushMuted}" FontStyle="Italic" FontSize="14"/>
-                </StackPanel>
+                        <TextBlock x:Name="StatusText" Text="Ready to capture. Use keyboard shortcut or the action button." Foreground="{StaticResource BrushMuted}" FontStyle="Italic" FontSize="14"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="ChatDetailPanel" Visibility="Collapsed">
+                        <TextBlock Text="Chat Detail" FontSize="34" FontWeight="Bold" Margin="0,0,0,16"/>
+
+                        <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Question" Foreground="{StaticResource BrushMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <TextBlock x:Name="ChatDetailQuestion" TextWrapping="Wrap" FontSize="16"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="22">
+                            <StackPanel>
+                                <TextBlock Text="Answer" Foreground="{StaticResource BrushMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="320">
+                                    <TextBlock x:Name="ChatDetailAnswer" TextWrapping="Wrap" FontSize="15" Padding="0,5,0,5"/>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
