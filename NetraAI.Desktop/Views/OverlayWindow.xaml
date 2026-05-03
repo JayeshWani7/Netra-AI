@@ -4,6 +4,8 @@
     Title="Netra AI"
     Height="520"
     Width="420"
+    MinHeight="360"
+    MinWidth="320"
     WindowStyle="None"
     AllowsTransparency="True"
     Background="Transparent"
@@ -32,7 +34,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Netra AI" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+                    <TextBlock Text="Netra AI" FontWeight="Bold" VerticalAlignment="Center" FontSize="14" Foreground="White"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button x:Name="ToggleButton" Content="Hide" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4" Margin="0,0,8,0" Click="ToggleButton_Click"/>
                         <Button x:Name="CloseButton" Content="Close" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4" Click="CloseButton_Click"/>
@@ -69,9 +71,42 @@
                     <Button x:Name="SendButton" Grid.Row="1" Grid.Column="1" Content="Send" Style="{StaticResource PrimaryButtonStyle}" Margin="10,0,0,0" Padding="16,8" Height="40" VerticalAlignment="Center" Click="SendButton_Click"/>
                 </Grid>
             </Border>
+
+            <Thumb x:Name="ResizeGrip"
+                   Width="16"
+                   Height="16"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,6,6"
+                   Cursor="SizeNWSE"
+                   DragDelta="ResizeGrip_DragDelta"/>
+
+                 <Thumb x:Name="ResizeGripTopLeft"
+                     Width="16"
+                     Height="16"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Top"
+                     Margin="6,6,0,0"
+                     Cursor="SizeNWSE"
+                     DragDelta="ResizeGripTopLeft_DragDelta"/>
         </Grid>
     </Border>
     
     <Window.Resources>
+        <Style TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Grid>
+                            <Path Data="M0,12 L12,0 M4,12 L12,4 M8,12 L12,8"
+                                  Stroke="{StaticResource BrushDivider}"
+                                  StrokeThickness="2"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 </Window>

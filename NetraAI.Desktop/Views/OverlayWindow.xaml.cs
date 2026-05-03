@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using NetraAI.Desktop.Models;
 using NetraAI.Desktop.Services;
@@ -17,6 +18,8 @@ namespace NetraAI.Desktop.Views
         private const double ExpandedHeight = 520;
         private const double HiddenWidth = 8;
         private const double HiddenHeight = 8;
+        private const double MinOverlayWidth = 320;
+        private const double MinOverlayHeight = 360;
 
         public bool IsHidden { get; private set; } = true;
         private readonly ScreenCaptureService _screenCaptureService;
@@ -97,6 +100,39 @@ namespace NetraAI.Desktop.Views
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             ShowHidden();
+        }
+
+        private void ResizeGrip_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            if (IsHidden)
+            {
+                return;
+            }
+
+            var nextWidth = Math.Max(MinOverlayWidth, Width + e.HorizontalChange);
+            var nextHeight = Math.Max(MinOverlayHeight, Height + e.VerticalChange);
+
+            Width = nextWidth;
+            Height = nextHeight;
+        }
+
+        private void ResizeGripTopLeft_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            if (IsHidden)
+            {
+                return;
+            }
+
+            var nextWidth = Math.Max(MinOverlayWidth, Width - e.HorizontalChange);
+            var nextHeight = Math.Max(MinOverlayHeight, Height - e.VerticalChange);
+
+            var widthChange = Width - nextWidth;
+            var heightChange = Height - nextHeight;
+
+            Width = nextWidth;
+            Height = nextHeight;
+            Left += widthChange;
+            Top += heightChange;
         }
 
         private void UseScreenButton_Click(object sender, RoutedEventArgs e)
