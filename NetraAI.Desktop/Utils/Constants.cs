@@ -51,7 +51,7 @@ namespace NetraAI.Desktop.Utils
 
         // Hotkeys
         public const string DefaultHotkey = "Ctrl+Alt+A";
-        public const string CaptureScreenHotkey = "Ctrl+Alt+S";
+        public const string CaptureScreenHotkey = "Ctrl+Alt+G";
         public const string SelectRegionHotkey = "Ctrl+Alt+R";
 
         // UI

@@ -57,6 +57,8 @@
     <!-- HTTP Client - using built-in HttpClient from .NET -->
   </ItemGroup>
 
+
+
   <!-- Conditional Test Project Reference -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
   </ItemGroup>
