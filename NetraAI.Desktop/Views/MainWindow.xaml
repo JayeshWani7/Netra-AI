@@ -74,7 +74,7 @@
                         <Border Background="#101010" BorderBrush="{StaticResource BrushDivider}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,0,0,18">
                             <StackPanel>
                                 <TextBlock Text="Getting Started" FontSize="24" FontWeight="Bold" Margin="0,0,0,12"/>
-                                <TextBlock Text="1. Use Ctrl+Alt+S to capture your screen." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
+                                <TextBlock Text="1. Use Ctrl+Alt+A to capture your screen." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
                                 <TextBlock Text="2. OCR extracts visible text from the capture." Foreground="{StaticResource BrushText}" Margin="0,0,0,8" FontSize="15"/>
                                 <TextBlock Text="3. Ask Netra AI for context and next actions." Foreground="{StaticResource BrushText}" FontSize="15"/>
                             </StackPanel>
