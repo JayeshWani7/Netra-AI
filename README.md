@@ -14,7 +14,7 @@ A professional Windows desktop application that acts as your AI copilot. Capture
 
 ## 🏗️ Tech Stack
 
-- **Frontend:** C# + WPF (.NET 8.0)
+- **Frontend:** C# + WPF (.NET 10.0)
 - **Authentication:** Firebase Authentication
 - **AI:** Google Gemini API
 - **OCR:** Tesseract
@@ -25,7 +25,7 @@ A professional Windows desktop application that acts as your AI copilot. Capture
 ## 📋 System Requirements
 
 - Windows 10 or later
-- .NET 8.0 Runtime
+- .NET 10.0 Runtime
 - 300MB RAM (minimum)
 - 100MB Disk Space
 
@@ -34,7 +34,7 @@ A professional Windows desktop application that acts as your AI copilot. Capture
 ### Prerequisites
 
 - Visual Studio 2022 or Visual Studio Code
-- .NET 8.0 SDK or later
+- .NET 10.0 SDK or later
 - Git
 
 ### Installation
