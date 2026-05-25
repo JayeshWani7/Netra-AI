@@ -35,6 +35,7 @@ namespace NetraAI.Desktop.Views
                 RegisterHotkeySafe("Ctrl+Alt+A", Key.A, ToggleOverlay, failedHotkeys);
                 RegisterHotkeySafe("Ctrl+Alt+G", Key.G, CaptureScreen, failedHotkeys);
                 RegisterHotkeySafe("Ctrl+Alt+R", Key.R, SelectRegion, failedHotkeys);
+                RegisterHotkeySafe("Ctrl+?", Key.OemQuestion, AutoCaptureAndAsk, failedHotkeys, Services.HotkeyManager.Modifiers.Control);
 
                 if (failedHotkeys.Count > 0)
                 {
@@ -58,12 +59,16 @@ namespace NetraAI.Desktop.Views
             }
         }
 
-        private void RegisterHotkeySafe(string display, Key key, System.Action callback, System.Collections.Generic.List<string> failures)
+        private void RegisterHotkeySafe(string display, Key key, System.Action callback, System.Collections.Generic.List<string> failures, Services.HotkeyManager.Modifiers modifiers = Services.HotkeyManager.Modifiers.None)
         {
             try
             {
+                var finalModifiers = modifiers == Services.HotkeyManager.Modifiers.None
+                    ? (Services.HotkeyManager.Modifiers.Control | Services.HotkeyManager.Modifiers.Alt)
+                    : modifiers;
+
                 _hotkeyManager?.RegisterHotkey(
-                    Services.HotkeyManager.Modifiers.Control | Services.HotkeyManager.Modifiers.Alt,
+                    finalModifiers,
                     (uint)KeyInterop.VirtualKeyFromKey(key),
                     callback);
             }
@@ -102,14 +107,38 @@ namespace NetraAI.Desktop.Views
 
         private void CaptureScreen()
         {
-            // TODO: Implement screen capture logic
-            MessageBox.Show("Screen capture triggered!", "Hotkey", MessageBoxButton.OK, MessageBoxImage.Information);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (_overlayWindow == null)
+                {
+                    _overlayWindow = new OverlayWindow();
+                    _overlayWindow.Closed += (s, e) => _overlayWindow = null;
+                }
+                _overlayWindow.Show();
+                _overlayWindow.Activate();
+            });
+        }
+
+        private void AutoCaptureAndAsk()
+        {
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                if (_overlayWindow == null)
+                {
+                    _overlayWindow = new OverlayWindow();
+                    _overlayWindow.Closed += (s, e) => _overlayWindow = null;
+                }
+
+                await _overlayWindow.AutoCaptureAndAskAsync("provide the complete executable java code solution for the screen shown. include all necessary imports, class definition, main method, and any helper methods. no comments, clean code, handle edge cases, optimize for performance. provide full working code that can run directly");
+            });
         }
 
         private void SelectRegion()
         {
-            // TODO: Implement region selection logic
-            MessageBox.Show("Region selection triggered!", "Hotkey", MessageBoxButton.OK, MessageBoxImage.Information);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _logger.Info("SelectRegion hotkey triggered");
+            });
         }
 
         public ContentControl GetContentHost()

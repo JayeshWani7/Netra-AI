@@ -43,12 +43,24 @@
             </Border>
             
             <!-- Chat Area -->
-            <ScrollViewer Grid.Row="1" Padding="18">
+            <ScrollViewer Grid.Row="1" Padding="12">
                 <StackPanel>
-                    <TextBox x:Name="ResponseText" Text="Overlay is ready. Captured context and AI responses will appear here."
-                             Background="Transparent" BorderThickness="0" Foreground="{StaticResource BrushMuted}"
-                             TextWrapping="Wrap" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled"/>
-                    <TextBlock x:Name="StatusText" Text="" Foreground="{StaticResource BrushMuted}" FontStyle="Italic" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                    <!-- Code Display Box -->
+                    <Border x:Name="CodeBoxBorder" Background="#0d1117" BorderBrush="#30363d" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                        <TextBox x:Name="ResponseText" 
+                                 Text="Overlay is ready. Captured context and AI responses will appear here."
+                                 Background="#0d1117" 
+                                 BorderThickness="0" 
+                                 Foreground="#c9d1d9"
+                                 FontFamily="Consolas,Courier New"
+                                 FontSize="12"
+                                 TextWrapping="Wrap" 
+                                 IsReadOnly="True" 
+                                 AcceptsReturn="True" 
+                                 VerticalScrollBarVisibility="Auto"
+                                 MaxHeight="350"/>
+                    </Border>
+                    <TextBlock x:Name="StatusText" Text="" Foreground="{StaticResource BrushMuted}" FontStyle="Italic" FontSize="11" TextWrapping="Wrap"/>
                 </StackPanel>
             </ScrollViewer>
             

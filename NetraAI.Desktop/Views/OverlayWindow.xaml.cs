@@ -65,7 +65,138 @@ namespace NetraAI.Desktop.Views
             {
                 Show();
             }
-            Activate();
+        }
+
+        public async Task AutoCaptureAndAskAsync(string userQuestion)
+        {
+            try
+            {
+                // Show the overlay
+                ShowExpanded();
+
+                // Capture screen
+                StatusText.Text = "Capturing screen...";
+                _attachedScreenshotPng = _screenCaptureService.CapturePrimaryScreenPng();
+
+                // Send to Gemini
+                SendButton.IsEnabled = false;
+                UseScreenButton.IsEnabled = false;
+                StatusText.Text = "Processing with Gemini...";
+
+                var user = _authService.GetCurrentUser();
+                var userId = user?.UserId ?? "anonymous";
+
+                var userMessage = new ChatMessage
+                {
+                    UserId = userId,
+                    Role = "user",
+                    Content = userQuestion,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                await _chatHistoryService.AppendMessagesAsync(userId, new[] { userMessage });
+
+                var response = await _geminiService.GenerateAsync(userQuestion, _attachedScreenshotPng, CancellationToken.None);
+                
+                // Extract code from markdown block and clean comments
+                var codeOnly = ExtractCodeFromMarkdown(response);
+                var cleanedResponse = RemoveComments(codeOnly);
+                
+                ResponseText.Text = cleanedResponse.Trim();
+                StatusText.Text = "Done.";
+                _attachedScreenshotPng = null;
+                PromptTextBox.Text = string.Empty;
+
+                var assistantMessage = new ChatMessage
+                {
+                    UserId = userId,
+                    Role = "assistant",
+                    Content = cleanedResponse.Trim(),
+                    Timestamp = DateTime.UtcNow
+                };
+
+                await _chatHistoryService.AppendMessagesAsync(userId, new[] { assistantMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Auto capture and ask failed: {ex.Message}", ex);
+                StatusText.Text = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                SendButton.IsEnabled = true;
+                UseScreenButton.IsEnabled = true;
+            }
+        }
+
+        private string RemoveComments(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return code;
+
+            var result = new System.Text.StringBuilder();
+            var chars = code.ToCharArray();
+            var i = 0;
+
+            while (i < chars.Length)
+            {
+                // Check for single-line comment
+                if (i < chars.Length - 1 && chars[i] == '/' && chars[i + 1] == '/')
+                {
+                    // Skip until end of line
+                    while (i < chars.Length && chars[i] != '\n')
+                        i++;
+                    if (i < chars.Length)
+                        result.Append('\n'); // Keep the newline
+                    i++;
+                    continue;
+                }
+
+                // Check for multi-line comment
+                if (i < chars.Length - 1 && chars[i] == '/' && chars[i + 1] == '*')
+                {
+                    i += 2; // Skip /*
+                    // Skip until */
+                    while (i < chars.Length - 1)
+                    {
+                        if (chars[i] == '*' && chars[i + 1] == '/')
+                        {
+                            i += 2;
+                            break;
+                        }
+                        if (chars[i] == '\n')
+                            result.Append('\n'); // Preserve newlines inside comments
+                        i++;
+                    }
+                    continue;
+                }
+
+                result.Append(chars[i]);
+                i++;
+            }
+
+            // Clean up excessive blank lines
+            var lines = result.ToString().Split('\n');
+            var cleaned = new System.Collections.Generic.List<string>();
+            var lastWasBlank = false;
+
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    if (!lastWasBlank)
+                        cleaned.Add("");
+                    lastWasBlank = true;
+                }
+                else
+                {
+                    cleaned.Add(line); // Keep original indentation
+                    lastWasBlank = false;
+                }
+            }
+
+            return string.Join("\n", cleaned).Trim();
         }
 
         private void ShowHidden()
@@ -189,7 +320,11 @@ namespace NetraAI.Desktop.Views
                 await _chatHistoryService.AppendMessagesAsync(userId, new[] { userMessage });
 
                 var response = await _geminiService.GenerateAsync(prompt, _attachedScreenshotPng, CancellationToken.None);
-                ResponseText.Text = response.Trim();
+                
+                // Clean comments from the response
+                var cleanedResponse = RemoveComments(response);
+                
+                ResponseText.Text = cleanedResponse.Trim();
                 StatusText.Text = "Done.";
                 _attachedScreenshotPng = null;
                 PromptTextBox.Text = string.Empty;
@@ -198,7 +333,7 @@ namespace NetraAI.Desktop.Views
                 {
                     UserId = userId,
                     Role = "assistant",
-                    Content = ResponseText.Text,
+                    Content = cleanedResponse.Trim(),
                     Timestamp = DateTime.UtcNow,
                     Model = ConfigurationManager.GetValue("Gemini:Model")
                 };
@@ -232,5 +367,55 @@ namespace NetraAI.Desktop.Views
                 UseScreenButton.IsEnabled = true;
             }
         }
+
+        private string ExtractCodeFromMarkdown(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+                return response;
+
+            var lines = response.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
+            var codeStartIndex = -1;
+            var codeEndIndex = -1;
+
+            // Find ```java or ``` (code block start)
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i].Trim();
+                if (line.StartsWith("```"))
+                {
+                    codeStartIndex = i;
+                    break;
+                }
+            }
+
+            // If no code block found, return original response
+            if (codeStartIndex == -1)
+                return response;
+
+            // Find closing ``` (code block end)
+            for (int i = codeStartIndex + 1; i < lines.Count; i++)
+            {
+                var line = lines[i].Trim();
+                if (line.StartsWith("```"))
+                {
+                    codeEndIndex = i;
+                    break;
+                }
+            }
+
+            // If no closing found, return everything after opening
+            if (codeEndIndex == -1)
+                codeEndIndex = lines.Count;
+
+            // Extract code between markers
+            var codeLines = new System.Collections.Generic.List<string>();
+            for (int i = codeStartIndex + 1; i < codeEndIndex; i++)
+            {
+                codeLines.Add(lines[i]);
+            }
+
+            return string.Join("\n", codeLines).Trim();
+        }
     }
 }
+

@@ -37,7 +37,7 @@ namespace NetraAI.Desktop.Utils
         public const int DefaultTimeout = 30000;
         public const int ScreenCaptureTimeout = 5000;
         public const int OcrTimeout = 10000;
-        public const int ApiCallTimeout = 30000;
+        public const int ApiCallTimeout = 120000;
 
         // Sizes
         public const int MaxScreenshotCacheSize = 50;
