@@ -23,12 +23,10 @@ namespace NetraAI.Desktop.Utils
     public class Logger : ILogger
     {
         private static Logger? _instance;
-        private readonly ILogger _serilogLogger;
         private static object _lockObject = new object();
 
         private Logger()
         {
-            _serilogLogger = this;
         }
 
         /// <summary>
