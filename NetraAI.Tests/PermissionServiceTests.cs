@@ -18,7 +18,7 @@ namespace NetraAI.Tests
         {
             var mockLogger = new Mock<ILogger>();
             _service = new PermissionService(mockLogger.Object);
-            _permissionsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NetraAI", "permissions.json");
+            _permissionsPath = Path.Combine(Constants.AppDataPath, Constants.PermissionsFileName);
             if (File.Exists(_permissionsPath)) File.Delete(_permissionsPath);
         }
 

@@ -18,11 +18,7 @@ namespace NetraAI.Desktop.Services
         public PermissionService(ILogger logger)
         {
             _logger = logger;
-            _permissionsFilePath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "NetraAI",
-                "permissions.json"
-            );
+            _permissionsFilePath = Path.Combine(Constants.AppDataPath, Constants.PermissionsFileName);
         }
 
         /// <summary>
