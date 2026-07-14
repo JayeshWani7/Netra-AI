@@ -21,6 +21,9 @@ namespace NetraAI.Desktop.Utils
         /// </summary>
         public static string Serialize<T>(T obj) where T : class
         {
+            if (obj == null)
+                return string.Empty;
+
             try
             {
                 return JsonConvert.SerializeObject(obj, _settings);
@@ -37,6 +40,9 @@ namespace NetraAI.Desktop.Utils
         /// </summary>
         public static T? Deserialize<T>(string json) where T : class
         {
+            if (string.IsNullOrWhiteSpace(json))
+                return null;
+
             try
             {
                 return JsonConvert.DeserializeObject<T>(json, _settings);
