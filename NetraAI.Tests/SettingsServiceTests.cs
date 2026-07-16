@@ -1,0 +1,70 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Xunit;
+using NetraAI.Desktop.Services;
+using NetraAI.Desktop.Models;
+using NetraAI.Desktop.Utils;
+
+namespace NetraAI.Tests
+{
+    public class SettingsServiceTests : IDisposable
+    {
+        private readonly SettingsService _service;
+        private readonly string _settingsFilePath;
+
+        public SettingsServiceTests()
+        {
+            _service = new SettingsService();
+            _settingsFilePath = Path.Combine(Constants.ConfigPath, Constants.SettingsFileName);
+            CleanupSettingsFile();
+        }
+
+        [Fact]
+        public async Task SaveAndLoadSettings_PersistsSuccessfully()
+        {
+            var config = new AppConfig
+            {
+                UserId = "test-user-id",
+                RememberMe = true,
+                Theme = "light",
+                Hotkey = "Ctrl+Shift+B",
+                LastUpdated = DateTime.UtcNow
+            };
+
+            var saved = await _service.SaveAsync(config);
+            Assert.True(saved);
+
+            var loaded = await _service.LoadAsync();
+            Assert.NotNull(loaded);
+            Assert.Equal(config.UserId, loaded.UserId);
+            Assert.Equal(config.RememberMe, loaded.RememberMe);
+            Assert.Equal(config.Theme, loaded.Theme);
+            Assert.Equal(config.Hotkey, loaded.Hotkey);
+        }
+
+        [Fact]
+        public void GetConfig_ReturnsInstance()
+        {
+            var config = _service.GetConfig();
+            Assert.NotNull(config);
+        }
+
+        private void CleanupSettingsFile()
+        {
+            try
+            {
+                if (File.Exists(_settingsFilePath))
+                {
+                    File.Delete(_settingsFilePath);
+                }
+            }
+            catch { }
+        }
+
+        public void Dispose()
+        {
+            CleanupSettingsFile();
+        }
+    }
+}

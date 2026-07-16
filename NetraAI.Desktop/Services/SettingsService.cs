@@ -32,8 +32,14 @@ namespace NetraAI.Desktop.Services
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(_settingsFilePath) ?? string.Empty);
-                var config = JsonHelper.DeserializeFromFile<AppConfig>(_settingsFilePath);
+                if (!File.Exists(_settingsFilePath))
+                {
+                    _config = new AppConfig();
+                    return _config;
+                }
+
+                var json = await File.ReadAllTextAsync(_settingsFilePath);
+                var config = JsonHelper.Deserialize<AppConfig>(json);
                 _config = config ?? new AppConfig();
                 return _config;
             }
@@ -48,13 +54,16 @@ namespace NetraAI.Desktop.Services
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(_settingsFilePath) ?? string.Empty);
-                var result = JsonHelper.SerializeToFile(config, _settingsFilePath);
-                if (result)
+                var directory = Path.GetDirectoryName(_settingsFilePath);
+                if (!string.IsNullOrEmpty(directory))
                 {
-                    _config = config;
+                    Directory.CreateDirectory(directory);
                 }
-                return result;
+
+                var json = JsonHelper.Serialize(config);
+                await File.WriteAllTextAsync(_settingsFilePath, json);
+                _config = config;
+                return true;
             }
             catch (Exception ex)
             {
