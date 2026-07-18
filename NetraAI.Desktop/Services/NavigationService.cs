@@ -66,25 +66,34 @@ namespace NetraAI.Desktop.Services
         {
             try
             {
-                _logger.Info($"Navigating to: {viewName}");
-
-                switch (viewName)
+                if (string.IsNullOrWhiteSpace(viewName))
                 {
-                    case "Login":
-                        NavigateToLogin();
-                        break;
-                    case "Permissions":
-                        NavigateToPermissions();
-                        break;
-                    case "Main":
-                        NavigateToMain();
-                        break;
-                    case "Settings":
-                        NavigateToSettings();
-                        break;
-                    default:
-                        _logger.Warning($"View '{viewName}' not registered");
-                        break;
+                    _logger.Warning("NavigateTo called with null or empty view name");
+                    return;
+                }
+
+                var normalizedName = viewName.Trim();
+                _logger.Info($"Navigating to: {normalizedName}");
+
+                if (string.Equals(normalizedName, "Login", StringComparison.OrdinalIgnoreCase))
+                {
+                    NavigateToLogin();
+                }
+                else if (string.Equals(normalizedName, "Permissions", StringComparison.OrdinalIgnoreCase))
+                {
+                    NavigateToPermissions();
+                }
+                else if (string.Equals(normalizedName, "Main", StringComparison.OrdinalIgnoreCase))
+                {
+                    NavigateToMain();
+                }
+                else if (string.Equals(normalizedName, "Settings", StringComparison.OrdinalIgnoreCase))
+                {
+                    NavigateToSettings();
+                }
+                else
+                {
+                    _logger.Warning($"View '{normalizedName}' not registered");
                 }
             }
             catch (Exception ex)
