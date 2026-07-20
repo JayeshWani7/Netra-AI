@@ -17,34 +17,43 @@ namespace NetraAI.Desktop.Utils
             "appsettings.json"
         );
 
+        private static readonly object _lockObject = new object();
+
         /// <summary>
         /// Initialize configuration from appsettings.json
         /// </summary>
         public static void Initialize()
         {
-            try
-            {
-                var configBuilder = new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            if (_configuration != null) return;
 
-                _configuration = configBuilder.Build();
-                
-                // Load Firebase config
-                _firebaseConfig = _configuration.GetSection("Firebase").Get<FirebaseConfig>();
-                
-                if (_firebaseConfig == null || !_firebaseConfig.IsValid())
-                {
-                    Logger.GetInstance().Warning("Firebase configuration is invalid or missing");
-                }
-                else
-                {
-                    Logger.GetInstance().Info($"Firebase configured for project: {_firebaseConfig.ProjectId}");
-                }
-            }
-            catch (Exception ex)
+            lock (_lockObject)
             {
-                Logger.GetInstance().Error($"Failed to initialize configuration: {ex.Message}", ex);
+                if (_configuration != null) return;
+
+                try
+                {
+                    var configBuilder = new ConfigurationBuilder()
+                        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                    _configuration = configBuilder.Build();
+                    
+                    // Load Firebase config
+                    _firebaseConfig = _configuration.GetSection("Firebase").Get<FirebaseConfig>();
+                    
+                    if (_firebaseConfig == null || !_firebaseConfig.IsValid())
+                    {
+                        Logger.GetInstance().Warning("Firebase configuration is invalid or missing");
+                    }
+                    else
+                    {
+                        Logger.GetInstance().Info($"Firebase configured for project: {_firebaseConfig.ProjectId}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.GetInstance().Error($"Failed to initialize configuration: {ex.Message}", ex);
+                }
             }
         }
 
@@ -53,7 +62,7 @@ namespace NetraAI.Desktop.Utils
         /// </summary>
         public static FirebaseConfig? GetFirebaseConfig()
         {
-            if (_firebaseConfig == null)
+            if (_configuration == null)
             {
                 Initialize();
             }
@@ -65,6 +74,11 @@ namespace NetraAI.Desktop.Utils
         /// </summary>
         public static IConfigurationSection? GetSection(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
             if (_configuration == null)
             {
                 Initialize();
@@ -77,6 +91,11 @@ namespace NetraAI.Desktop.Utils
         /// </summary>
         public static string? GetValue(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
             if (_configuration == null)
             {
                 Initialize();
