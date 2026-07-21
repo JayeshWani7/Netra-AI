@@ -41,8 +41,8 @@ A professional Windows desktop application that acts as your AI copilot. Capture
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/netra-ai.git
-   cd netra-ai
+   git clone https://github.com/JayeshWani7/Netra-AI.git
+   cd Netra-AI
    ```
 
 2. **Open the solution**
@@ -97,7 +97,7 @@ See [docs/API_KEYS.md](docs/API_KEYS.md) for detailed setup instructions:
 
 ### Project Phases
 
-See [PROJECT_PHASES.md](../PROJECT_PHASES.md) for detailed implementation roadmap:
+See [PROJECT_PHASES.md](PROJECT_PHASES.md) for detailed implementation roadmap:
 
 - **Phase 1:** Foundation & Setup ✅
 - **Phase 2:** Screen Capture & OCR
