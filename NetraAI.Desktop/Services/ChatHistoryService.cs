@@ -44,6 +44,12 @@ namespace NetraAI.Desktop.Services
         {
             try
             {
+                if (messages == null)
+                {
+                    _logger.Warning("AppendMessagesAsync called with null messages collection.");
+                    return Task.FromResult(false);
+                }
+
                 var path = GetUserHistoryPath(userId);
                 Directory.CreateDirectory(Path.GetDirectoryName(path) ?? string.Empty);
 
@@ -73,6 +79,11 @@ namespace NetraAI.Desktop.Services
         {
             try
             {
+                if (messageIds == null)
+                {
+                    return Task.FromResult(true);
+                }
+
                 var ids = new HashSet<Guid>(messageIds);
                 if (ids.Count == 0)
                 {
