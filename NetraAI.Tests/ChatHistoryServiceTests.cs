@@ -83,6 +83,21 @@ namespace NetraAI.Tests
             Assert.Equal(msg2.Id, remaining[0].Id);
         }
 
+        [Fact]
+        public async Task ClearAllMessagesAsync_RemovesAllMessages()
+        {
+            var msg1 = new ChatMessage { Id = Guid.NewGuid(), Role = "user", Content = "Msg 1", Timestamp = DateTime.UtcNow };
+            var msg2 = new ChatMessage { Id = Guid.NewGuid(), Role = "assistant", Content = "Msg 2", Timestamp = DateTime.UtcNow.AddSeconds(1) };
+
+            await _service.AppendMessagesAsync(_testUserId, new[] { msg1, msg2 });
+
+            var cleared = await _service.ClearAllMessagesAsync(_testUserId);
+            Assert.True(cleared);
+
+            var remaining = await _service.GetMessagesAsync(_testUserId);
+            Assert.Empty(remaining);
+        }
+
         public void Dispose()
         {
             try

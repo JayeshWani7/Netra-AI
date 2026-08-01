@@ -108,6 +108,26 @@ namespace NetraAI.Desktop.Services
             }
         }
 
+        public Task<bool> ClearAllMessagesAsync(string userId)
+        {
+            try
+            {
+                var path = GetUserHistoryPath(userId);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                OnChatHistoryUpdated(userId, 0);
+                return Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to clear all chat history: {ex.Message}", ex);
+                return Task.FromResult(false);
+            }
+        }
+
         private void OnChatHistoryUpdated(string userId, int messageCount)
         {
             ChatHistoryUpdated?.Invoke(this, new ChatHistoryUpdatedEventArgs(userId, messageCount));
