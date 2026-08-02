@@ -98,6 +98,66 @@ namespace NetraAI.Tests
             Assert.Empty(remaining);
         }
 
+        [Fact]
+        public async Task AppendMessagesAsync_RaisesChatHistoryUpdatedEvent()
+        {
+            ChatHistoryUpdatedEventArgs? eventArgs = null;
+            _service.ChatHistoryUpdated += (sender, args) => eventArgs = args;
+
+            var msg = new ChatMessage
+            {
+                Id = Guid.NewGuid(),
+                Role = "user",
+                Content = "Hello event",
+                Timestamp = DateTime.UtcNow
+            };
+
+            await _service.AppendMessagesAsync(_testUserId, new[] { msg });
+
+            Assert.NotNull(eventArgs);
+            Assert.Equal(_testUserId, eventArgs.UserId);
+            Assert.Equal(1, eventArgs.MessageCount);
+        }
+
+        [Fact]
+        public async Task DeleteMessagesAsync_RaisesChatHistoryUpdatedEvent()
+        {
+            var msg1 = new ChatMessage { Id = Guid.NewGuid(), Role = "user", Content = "Msg 1", Timestamp = DateTime.UtcNow };
+            var msg2 = new ChatMessage { Id = Guid.NewGuid(), Role = "assistant", Content = "Msg 2", Timestamp = DateTime.UtcNow.AddSeconds(1) };
+            await _service.AppendMessagesAsync(_testUserId, new[] { msg1, msg2 });
+
+            ChatHistoryUpdatedEventArgs? eventArgs = null;
+            _service.ChatHistoryUpdated += (sender, args) => eventArgs = args;
+
+            await _service.DeleteMessagesAsync(_testUserId, new[] { msg1.Id });
+
+            Assert.NotNull(eventArgs);
+            Assert.Equal(_testUserId, eventArgs.UserId);
+            Assert.Equal(1, eventArgs.MessageCount);
+        }
+
+        [Fact]
+        public async Task ClearAllMessagesAsync_RaisesChatHistoryUpdatedEventWithZeroCount()
+        {
+            var msg = new ChatMessage
+            {
+                Id = Guid.NewGuid(),
+                Role = "user",
+                Content = "To be cleared",
+                Timestamp = DateTime.UtcNow
+            };
+            await _service.AppendMessagesAsync(_testUserId, new[] { msg });
+
+            ChatHistoryUpdatedEventArgs? eventArgs = null;
+            _service.ChatHistoryUpdated += (sender, args) => eventArgs = args;
+
+            await _service.ClearAllMessagesAsync(_testUserId);
+
+            Assert.NotNull(eventArgs);
+            Assert.Equal(_testUserId, eventArgs.UserId);
+            Assert.Equal(0, eventArgs.MessageCount);
+        }
+
         public void Dispose()
         {
             try
