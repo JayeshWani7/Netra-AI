@@ -50,6 +50,30 @@ namespace NetraAI.Tests
             Assert.NotNull(config);
         }
 
+        [Fact]
+        public async Task ResetToDefaultsAsync_ResetsConfigToDefaults()
+        {
+            var customConfig = new AppConfig
+            {
+                UserId = "custom-user",
+                Theme = "light",
+                Hotkey = "Ctrl+Shift+X",
+                RememberMe = true
+            };
+
+            await _service.SaveAsync(customConfig);
+
+            var resetResult = await _service.ResetToDefaultsAsync();
+            Assert.True(resetResult);
+
+            var loaded = await _service.LoadAsync();
+            Assert.NotNull(loaded);
+            Assert.Equal("dark", loaded.Theme);
+            Assert.Equal("Ctrl+Alt+A", loaded.Hotkey);
+            Assert.False(loaded.RememberMe);
+            Assert.Empty(loaded.UserId);
+        }
+
         private void CleanupSettingsFile()
         {
             try

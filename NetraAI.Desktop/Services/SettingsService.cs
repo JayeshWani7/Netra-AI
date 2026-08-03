@@ -71,5 +71,14 @@ namespace NetraAI.Desktop.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// Resets application settings to default values and persists them.
+        /// </summary>
+        public async Task<bool> ResetToDefaultsAsync()
+        {
+            var defaultConfig = new AppConfig();
+            return await SaveAsync(defaultConfig);
+        }
     }
 }
