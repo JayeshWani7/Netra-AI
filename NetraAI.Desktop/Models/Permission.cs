@@ -28,5 +28,10 @@ namespace NetraAI.Desktop.Models
         /// Check if user has permission for background execution
         /// </summary>
         public bool HasBackgroundRunning() => BackgroundRunning && IsExplicitlyRequested;
+
+        /// <summary>
+        /// Check if user has permission for clipboard access
+        /// </summary>
+        public bool HasClipboardAccess() => ClipboardAccess && IsExplicitlyRequested;
     }
 }

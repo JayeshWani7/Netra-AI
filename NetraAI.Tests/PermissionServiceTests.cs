@@ -46,6 +46,32 @@ namespace NetraAI.Tests
             Assert.Equal(permissions.BackgroundRunning, loaded.BackgroundRunning);
         }
 
+        [Fact]
+        public async Task HasPermission_ReturnsCorrectStatus()
+        {
+            Assert.False(_service.HasScreenAccess());
+            Assert.False(_service.HasMicrophoneAccess());
+            Assert.False(_service.HasBackgroundRunning());
+            Assert.False(_service.HasClipboardAccess());
+
+            var permissions = new Permission
+            {
+                UserId = "test-user",
+                ScreenAccess = true,
+                MicrophoneAccess = false,
+                BackgroundRunning = true,
+                ClipboardAccess = true,
+                IsExplicitlyRequested = true
+            };
+
+            await _service.SavePermissionsAsync(permissions);
+
+            Assert.True(_service.HasScreenAccess());
+            Assert.False(_service.HasMicrophoneAccess());
+            Assert.True(_service.HasBackgroundRunning());
+            Assert.True(_service.HasClipboardAccess());
+        }
+
         public void Dispose()
         {
             try

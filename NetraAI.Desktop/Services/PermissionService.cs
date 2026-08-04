@@ -81,6 +81,11 @@ namespace NetraAI.Desktop.Services
         public bool HasBackgroundRunning() => _permissions?.HasBackgroundRunning() ?? false;
 
         /// <summary>
+        /// Check if user has clipboard access permission
+        /// </summary>
+        public bool HasClipboardAccess() => _permissions?.HasClipboardAccess() ?? false;
+
+        /// <summary>
         /// Request permission from user
         /// </summary>
         public async Task<bool> RequestPermissionAsync(string permissionType)
