@@ -36,18 +36,29 @@ namespace NetraAI.Desktop.Services
             var firebaseConfig = ConfigurationManager.GetFirebaseConfig();
             if (firebaseConfig == null || string.IsNullOrEmpty(firebaseConfig.ApiKey))
             {
-                throw new InvalidOperationException("Firebase API Key not configured");
+                _logger.Warning("Firebase API Key is not configured");
+                _firebaseApiKey = string.Empty;
+                _googleClientId = string.Empty;
+                _googleClientSecret = string.Empty;
+                _googleRedirectUri = string.Empty;
             }
-            
-            _firebaseApiKey = firebaseConfig.ApiKey;
-            _googleClientId = firebaseConfig.GoogleClientId ?? string.Empty;
-            _googleClientSecret = firebaseConfig.GoogleClientSecret ?? string.Empty;
-            _googleRedirectUri = firebaseConfig.GoogleRedirectUri ?? string.Empty;
-            _logger.Info("AuthService initialized with Firebase configuration");
+            else
+            {
+                _firebaseApiKey = firebaseConfig.ApiKey;
+                _googleClientId = firebaseConfig.GoogleClientId ?? string.Empty;
+                _googleClientSecret = firebaseConfig.GoogleClientSecret ?? string.Empty;
+                _googleRedirectUri = firebaseConfig.GoogleRedirectUri ?? string.Empty;
+                _logger.Info("AuthService initialized with Firebase configuration");
+            }
         }
 
         public async Task<User?> LoginAsync(string email, string password)
         {
+            if (string.IsNullOrEmpty(_firebaseApiKey))
+            {
+                throw new InvalidOperationException("Firebase API Key not configured");
+            }
+
             try
             {
                 _logger.Info($"Attempting login for user: {email}");

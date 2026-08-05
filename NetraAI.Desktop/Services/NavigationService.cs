@@ -20,6 +20,16 @@ namespace NetraAI.Desktop.Services
             _logger.Info("Navigation service initialized for single-window navigation");
         }
 
+        /// <summary>
+        /// Gets the name of the currently active view
+        /// </summary>
+        public string? CurrentViewName { get; private set; }
+
+        /// <summary>
+        /// Gets whether the navigation shell is initialized
+        /// </summary>
+        public bool IsInitialized => _contentHost != null;
+
         public void InitializeShell(Window shellWindow, ContentControl contentHost)
         {
             _shellWindow = shellWindow;
@@ -111,6 +121,7 @@ namespace NetraAI.Desktop.Services
             _shellWindow?.Close();
             _shellWindow = null;
             _contentHost = null;
+            CurrentViewName = null;
         }
 
         /// <summary>
@@ -133,6 +144,7 @@ namespace NetraAI.Desktop.Services
 
                 _logger.Info($"Navigating to {viewName} view in shell");
                 _contentHost.Content = view;
+                CurrentViewName = viewName;
             }
             catch (Exception ex)
             {

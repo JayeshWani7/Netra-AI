@@ -39,5 +39,18 @@ namespace NetraAI.Tests
             mockLogger.Verify(l => l.Warning(It.Is<string>(s => s.Contains("not registered") && s.Contains("SomeRandomView"))), Times.Once);
             mockLogger.Verify(l => l.Warning(It.Is<string>(s => s.Contains("not registered") && s.Contains("AnotherInvalidView"))), Times.Once);
         }
+
+        [Fact]
+        public void InitialState_UninitializedAndNullCurrentView()
+        {
+            // Arrange
+            var mockLogger = new Mock<ILogger>();
+            var service = new NavigationService(mockLogger.Object);
+
+            // Assert
+            Assert.False(service.IsInitialized);
+            Assert.Null(service.CurrentViewName);
+            Assert.Null(service.GetCurrentWindow());
+        }
     }
 }
