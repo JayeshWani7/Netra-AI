@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace NetraAI.Desktop.Utils
@@ -75,6 +76,26 @@ namespace NetraAI.Desktop.Utils
         }
 
         /// <summary>
+        /// Deserialize JSON from file asynchronously
+        /// </summary>
+        public static async Task<T?> DeserializeFromFileAsync<T>(string filePath) where T : class
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                    return null;
+
+                var json = await File.ReadAllTextAsync(filePath);
+                return Deserialize<T>(json);
+            }
+            catch (Exception ex)
+            {
+                Logger.GetInstance().Error($"Failed to deserialize from file asynchronously: {ex.Message}", ex);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Serialize to JSON file
         /// </summary>
         public static bool SerializeToFile<T>(T obj, string filePath) where T : class
@@ -89,6 +110,29 @@ namespace NetraAI.Desktop.Utils
             catch (Exception ex)
             {
                 Logger.GetInstance().Error($"Failed to serialize to file: {ex.Message}", ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Serialize to JSON file asynchronously
+        /// </summary>
+        public static async Task<bool> SerializeToFileAsync<T>(T obj, string filePath) where T : class
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                var json = Serialize(obj);
+                await File.WriteAllTextAsync(filePath, json);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.GetInstance().Error($"Failed to serialize to file asynchronously: {ex.Message}", ex);
                 return false;
             }
         }

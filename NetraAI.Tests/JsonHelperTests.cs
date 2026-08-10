@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 using NetraAI.Desktop.Utils;
 
@@ -63,6 +64,31 @@ namespace NetraAI.Tests
                 Assert.NotNull(loadedObj);
                 Assert.Equal("FileTest", loadedObj.Name);
                 Assert.Equal(456, loadedObj.Value);
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task FileOperationsAsync_SaveAndLoad_Succeeds()
+        {
+            var tempFile = Path.Combine(Path.GetTempPath(), $"jsonhelper_async_test_{Guid.NewGuid()}.json");
+            try
+            {
+                var obj = new TestClass { Name = "AsyncFileTest", Value = 789 };
+                var saveResult = await JsonHelper.SerializeToFileAsync(obj, tempFile);
+                Assert.True(saveResult);
+                Assert.True(File.Exists(tempFile));
+
+                var loadedObj = await JsonHelper.DeserializeFromFileAsync<TestClass>(tempFile);
+                Assert.NotNull(loadedObj);
+                Assert.Equal("AsyncFileTest", loadedObj.Name);
+                Assert.Equal(789, loadedObj.Value);
             }
             finally
             {
