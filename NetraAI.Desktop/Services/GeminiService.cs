@@ -8,23 +8,40 @@ using Newtonsoft.Json.Linq;
 
 namespace NetraAI.Desktop.Services
 {
+    /// <summary>
+    /// Service for interacting with Google Gemini API
+    /// </summary>
     public class GeminiService
     {
-        private static readonly HttpClient HttpClient = new HttpClient
+        private readonly HttpClient _httpClient;
+        private readonly ILogger? _logger;
+        private readonly string? _apiKey;
+
+        public GeminiService() : this(null, null, null) { }
+
+        public GeminiService(HttpClient? httpClient, ILogger? logger = null, string? apiKey = null)
         {
-            Timeout = TimeSpan.FromMilliseconds(Constants.ApiCallTimeout)
-        };
+            _httpClient = httpClient ?? new HttpClient
+            {
+                Timeout = TimeSpan.FromMilliseconds(Constants.ApiCallTimeout)
+            };
+            _logger = logger;
+            _apiKey = apiKey;
+        }
 
         public async Task<string> GenerateAsync(string prompt, byte[]? pngBytes, CancellationToken cancellationToken)
         {
-            var apiKey = ConfigurationManager.GetValue("Gemini:ApiKey");
+            var apiKey = _apiKey ?? ConfigurationManager.GetValue("Gemini:ApiKey");
             if (string.IsNullOrWhiteSpace(apiKey))
             {
+                _logger?.Warning("Gemini API key is missing");
                 throw new InvalidOperationException("Gemini API key is missing. Set Gemini:ApiKey in appsettings.json.");
             }
 
             var model = ConfigurationManager.GetValue("Gemini:Model") ?? "gemini-1.5-flash";
             var endpoint = $"{Constants.GeminiApiEndpoint}/models/{model}:generateContent?key={apiKey}";
+
+            _logger?.Info($"Sending generation request to Gemini API (model: {model})");
 
             var parts = new JArray
             {
@@ -60,11 +77,12 @@ namespace NetraAI.Desktop.Services
             );
 
             using var content = new StringContent(requestBody.ToString(), Encoding.UTF8, "application/json");
-            using var response = await HttpClient.PostAsync(endpoint, content, cancellationToken);
+            using var response = await _httpClient.PostAsync(endpoint, content, cancellationToken);
             var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
+                _logger?.Error($"Gemini API error ({(int)response.StatusCode}): {responseText}");
                 throw new InvalidOperationException($"Gemini API error ({(int)response.StatusCode}): {responseText}");
             }
 
