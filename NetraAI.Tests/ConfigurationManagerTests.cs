@@ -29,5 +29,18 @@ namespace NetraAI.Tests
             // In test environment without full appsettings.json initialized, it should not throw exception
             Assert.True(true);
         }
+
+        [Fact]
+        public void GetValueGeneric_MissingOrInvalidKey_ReturnsDefaultValue()
+        {
+            var intResult = ConfigurationManager.GetValue<int>("NonExistentKey", 42);
+            Assert.Equal(42, intResult);
+
+            var boolResult = ConfigurationManager.GetValue<bool>("NonExistentKey", true);
+            Assert.True(boolResult);
+
+            var stringResult = ConfigurationManager.GetValue<string>("NonExistentKey", "default");
+            Assert.Equal("default", stringResult);
+        }
     }
 }

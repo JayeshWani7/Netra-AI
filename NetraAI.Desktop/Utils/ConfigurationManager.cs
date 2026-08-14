@@ -102,5 +102,26 @@ namespace NetraAI.Desktop.Utils
             }
             return _configuration?[key];
         }
+
+        /// <summary>
+        /// Get strongly-typed configuration value with fallback default value
+        /// </summary>
+        public static T GetValue<T>(string key, T defaultValue = default!)
+        {
+            var rawValue = GetValue(key);
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return defaultValue;
+            }
+
+            try
+            {
+                return (T)Convert.ChangeType(rawValue, typeof(T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
     }
 }
