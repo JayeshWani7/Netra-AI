@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NetraAI.Desktop.Models
 {
     /// <summary>
@@ -14,6 +18,16 @@ namespace NetraAI.Desktop.Models
         public double? Confidence { get; set; }
         public string? Model { get; set; } // AI model used (e.g., "gemini-pro")
         public int? TokensUsed { get; set; }
+
+        /// <summary>
+        /// Checks whether the message is sent by a user
+        /// </summary>
+        public bool IsUser => string.Equals(Role, "user", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Checks whether the message is sent by an assistant
+        /// </summary>
+        public bool IsAssistant => string.Equals(Role, "assistant", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -44,6 +58,14 @@ namespace NetraAI.Desktop.Models
         public List<ChatMessage> GetContext(int maxMessages = 10)
         {
             return Messages.TakeLast(maxMessages).ToList();
+        }
+
+        /// <summary>
+        /// Gets total tokens used across all messages in this session
+        /// </summary>
+        public int GetTotalTokensUsed()
+        {
+            return Messages.Sum(m => m.TokensUsed ?? 0);
         }
     }
 }
