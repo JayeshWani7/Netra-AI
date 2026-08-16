@@ -39,17 +39,24 @@ namespace NetraAI.Desktop.Models
 
         public bool IsValid()
         {
-            return !string.IsNullOrEmpty(ApiKey) &&
-                   !string.IsNullOrEmpty(AuthDomain) &&
-                   !string.IsNullOrEmpty(ProjectId) &&
-                   !string.IsNullOrEmpty(StorageBucket) &&
-                   !string.IsNullOrEmpty(MessagingSenderId) &&
-                   !string.IsNullOrEmpty(AppId);
+            return !string.IsNullOrWhiteSpace(ApiKey) &&
+                   !string.IsNullOrWhiteSpace(AuthDomain) &&
+                   !string.IsNullOrWhiteSpace(ProjectId) &&
+                   !string.IsNullOrWhiteSpace(StorageBucket) &&
+                   !string.IsNullOrWhiteSpace(MessagingSenderId) &&
+                   !string.IsNullOrWhiteSpace(AppId);
         }
 
         public bool IsGoogleAuthConfigured()
         {
             return !string.IsNullOrWhiteSpace(GoogleClientId);
+        }
+
+        public bool IsGoogleOAuthFullyConfigured()
+        {
+            return IsGoogleAuthConfigured() &&
+                   !string.IsNullOrWhiteSpace(GoogleClientSecret) &&
+                   !string.IsNullOrWhiteSpace(GoogleRedirectUri);
         }
     }
 }
