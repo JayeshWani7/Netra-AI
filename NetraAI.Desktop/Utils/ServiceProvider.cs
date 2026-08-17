@@ -12,6 +12,11 @@ namespace NetraAI.Desktop.Utils
         private static object _lockObject = new object();
 
         /// <summary>
+        /// Gets whether the service provider container is initialized
+        /// </summary>
+        public static bool IsInitialized => _provider != null;
+
+        /// <summary>
         /// Initialize dependency injection container
         /// </summary>
         public static void Initialize()
@@ -34,6 +39,8 @@ namespace NetraAI.Desktop.Utils
                     services.AddSingleton<PermissionService>();
                     services.AddSingleton<NavigationService>();
                     services.AddSingleton<ChatHistoryService>();
+                    services.AddSingleton<GeminiService>();
+                    services.AddSingleton<ScreenCaptureService>();
 
                     _provider = services.BuildServiceProvider();
 
