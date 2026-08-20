@@ -46,5 +46,31 @@ namespace NetraAI.Desktop.Services
                 return Array.Empty<byte>();
             }
         }
+
+        /// <summary>
+        /// Converts a PNG byte array into a WPF BitmapSource for UI image rendering
+        /// </summary>
+        public static System.Windows.Media.Imaging.BitmapSource? ConvertToBitmapSource(byte[]? pngBytes)
+        {
+            if (pngBytes == null || pngBytes.Length == 0)
+                return null;
+
+            try
+            {
+                using var stream = new MemoryStream(pngBytes);
+                var bitmapImage = new System.Windows.Media.Imaging.BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+                return bitmapImage;
+            }
+            catch (Exception ex)
+            {
+                Logger.GetInstance().Error($"Failed to convert PNG bytes to BitmapSource: {ex.Message}", ex);
+                return null;
+            }
+        }
     }
 }

@@ -31,5 +31,19 @@ namespace NetraAI.Tests
 
             Assert.NotNull(bytes);
         }
+
+        [Fact]
+        public void ConvertToBitmapSource_NullOrEmptyBytes_ReturnsNull()
+        {
+            Assert.Null(ScreenCaptureService.ConvertToBitmapSource(null));
+            Assert.Null(ScreenCaptureService.ConvertToBitmapSource(System.Array.Empty<byte>()));
+        }
+
+        [Fact]
+        public void ConvertToBitmapSource_InvalidBytes_ReturnsNull()
+        {
+            var invalidBytes = new byte[] { 1, 2, 3, 4, 5 };
+            Assert.Null(ScreenCaptureService.ConvertToBitmapSource(invalidBytes));
+        }
     }
 }
