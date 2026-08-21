@@ -28,6 +28,13 @@ namespace NetraAI.Desktop.Services
         private const string GoogleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         private const string GoogleTokenUrl = "https://oauth2.googleapis.com/token";
 
+        public event EventHandler<User?>? AuthStateChanged;
+
+        private void OnAuthStateChanged(User? user)
+        {
+            AuthStateChanged?.Invoke(this, user);
+        }
+
         public AuthService(ILogger logger)
         {
             _logger = logger;
@@ -279,6 +286,7 @@ namespace NetraAI.Desktop.Services
                 }
                 
                 _currentUser = null;
+                OnAuthStateChanged(null);
                 await Task.CompletedTask;
             }
             catch (Exception ex)
@@ -295,6 +303,7 @@ namespace NetraAI.Desktop.Services
         public void RestoreSession(User user)
         {
             _currentUser = user;
+            OnAuthStateChanged(_currentUser);
         }
 
         public bool IsAuthenticated()

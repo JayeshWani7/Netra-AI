@@ -8,6 +8,11 @@ namespace NetraAI.Desktop.Services
     public interface IAuthService
     {
         /// <summary>
+        /// Event raised when authentication state changes (user logs in or out)
+        /// </summary>
+        event System.EventHandler<User?>? AuthStateChanged;
+
+        /// <summary>
         /// Login user with email and password
         /// </summary>
         Task<User?> LoginAsync(string email, string password);

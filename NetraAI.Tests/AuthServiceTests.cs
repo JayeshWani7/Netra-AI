@@ -67,5 +67,30 @@ namespace NetraAI.Tests
             // Assert
             Assert.False(_authService.IsAuthenticated());
         }
+
+        [Fact]
+        public async Task AuthStateChanged_FiredOnRestoreSessionAndLogout()
+        {
+            User? eventUser = null;
+            int eventCallCount = 0;
+
+            _authService.AuthStateChanged += (sender, user) =>
+            {
+                eventUser = user;
+                eventCallCount++;
+            };
+
+            var testUser = new User { UserId = "test-123", Email = "test@example.com", AuthToken = "token" };
+            _authService.RestoreSession(testUser);
+
+            Assert.Equal(1, eventCallCount);
+            Assert.NotNull(eventUser);
+            Assert.Equal("test-123", eventUser!.UserId);
+
+            await _authService.LogoutAsync();
+
+            Assert.Equal(2, eventCallCount);
+            Assert.Null(eventUser);
+        }
     }
 }
