@@ -88,5 +88,55 @@ namespace NetraAI.Desktop.Services
                 UnregisterHotKey(_source.Handle, id);
             _source.RemoveHook(HwndHook);
         }
+
+        /// <summary>
+        /// Parses a hotkey string (e.g. "Ctrl+Alt+A", "Shift+G") into Modifiers and Virtual Key code.
+        /// </summary>
+        public static bool ParseHotkeyString(string? hotkeyString, out Modifiers modifiers, out uint key)
+        {
+            modifiers = Modifiers.None;
+            key = 0;
+
+            if (string.IsNullOrWhiteSpace(hotkeyString))
+            {
+                return false;
+            }
+
+            var parts = hotkeyString.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (var part in parts)
+            {
+                var upper = part.ToUpperInvariant();
+                switch (upper)
+                {
+                    case "CTRL":
+                    case "CONTROL":
+                        modifiers |= Modifiers.Control;
+                        break;
+                    case "ALT":
+                        modifiers |= Modifiers.Alt;
+                        break;
+                    case "SHIFT":
+                        modifiers |= Modifiers.Shift;
+                        break;
+                    case "WIN":
+                    case "WINDOWS":
+                        modifiers |= Modifiers.Win;
+                        break;
+                    default:
+                        if (upper.Length == 1 && char.IsLetterOrDigit(upper[0]))
+                        {
+                            key = (uint)upper[0];
+                        }
+                        break;
+                }
+            }
+
+            return key != 0;
+        }
     }
 }
