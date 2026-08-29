@@ -63,5 +63,16 @@ namespace NetraAI.Desktop.Utils
         // Themes
         public const string ThemeDark = "dark";
         public const string ThemeLight = "light";
+
+        /// <summary>
+        /// Validates whether a theme string is a supported application theme
+        /// </summary>
+        public static bool IsValidTheme(string? theme)
+        {
+            if (string.IsNullOrWhiteSpace(theme)) return false;
+            var trimmed = theme.Trim();
+            return string.Equals(trimmed, ThemeDark, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(trimmed, ThemeLight, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
