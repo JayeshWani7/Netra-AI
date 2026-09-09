@@ -28,6 +28,16 @@ namespace NetraAI.Desktop.Models
         /// Checks whether the message is sent by an assistant
         /// </summary>
         public bool IsAssistant => string.Equals(Role, "assistant", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Checks whether the message has an associated screenshot artifact
+        /// </summary>
+        public bool HasScreenshot => ScreenshotId.HasValue && ScreenshotId.Value != Guid.Empty;
+
+        /// <summary>
+        /// Checks whether the message contains valid role and non-empty content
+        /// </summary>
+        public bool IsValid => !string.IsNullOrWhiteSpace(Role) && !string.IsNullOrWhiteSpace(Content);
     }
 
     /// <summary>
@@ -67,5 +77,18 @@ namespace NetraAI.Desktop.Models
         {
             return Messages.Sum(m => m.TokensUsed ?? 0);
         }
+
+        /// <summary>
+        /// Gets the most recent message in the session, or null if session is empty
+        /// </summary>
+        public ChatMessage? GetLatestMessage()
+        {
+            return Messages.LastOrDefault();
+        }
+
+        /// <summary>
+        /// Checks whether the session contains any messages
+        /// </summary>
+        public bool IsEmpty => Messages.Count == 0;
     }
 }
