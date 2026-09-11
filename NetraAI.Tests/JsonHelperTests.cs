@@ -50,6 +50,46 @@ namespace NetraAI.Tests
         }
 
         [Fact]
+        public void TryDeserialize_ValidJson_ReturnsTrueAndObject()
+        {
+            var json = "{\"Name\":\"Safe\",\"Value\":999}";
+            var success = JsonHelper.TryDeserialize<TestClass>(json, out var result);
+
+            Assert.True(success);
+            Assert.NotNull(result);
+            Assert.Equal("Safe", result!.Name);
+            Assert.Equal(999, result.Value);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        [InlineData("not a json string")]
+        [InlineData("{invalid_json: true")]
+        public void TryDeserialize_InvalidOrEmpty_ReturnsFalseAndNull(string? json)
+        {
+            var success = JsonHelper.TryDeserialize<TestClass>(json!, out var result);
+
+            Assert.False(success);
+            Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData("{\"key\":\"value\"}", true)]
+        [InlineData("[1, 2, 3]", true)]
+        [InlineData("  {\"name\": \"John\"}  ", true)]
+        [InlineData("invalid json", false)]
+        [InlineData("{broken json", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void IsValidJson_EvaluatesJsonSyntax(string? json, bool expectedIsValid)
+        {
+            var result = JsonHelper.IsValidJson(json!);
+            Assert.Equal(expectedIsValid, result);
+        }
+
+        [Fact]
         public void FileOperations_SaveAndLoad_Succeeds()
         {
             var tempFile = Path.Combine(Path.GetTempPath(), $"jsonhelper_test_{Guid.NewGuid()}.json");

@@ -56,6 +56,54 @@ namespace NetraAI.Desktop.Utils
         }
 
         /// <summary>
+        /// Attempts to deserialize a JSON string to an object safely without throwing exceptions
+        /// </summary>
+        public static bool TryDeserialize<T>(string json, out T? result) where T : class
+        {
+            result = null;
+            if (string.IsNullOrWhiteSpace(json))
+                return false;
+
+            try
+            {
+                result = JsonConvert.DeserializeObject<T>(json, _settings);
+                return result != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks whether a given string is valid JSON content
+        /// </summary>
+        public static bool IsValidJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+                return false;
+
+            json = json.Trim();
+            if ((!json.StartsWith("{") || !json.EndsWith("}")) &&
+                (!json.StartsWith("[") || !json.EndsWith("]")))
+            {
+                return false;
+            }
+
+            try
+            {
+                using var stringReader = new StringReader(json);
+                using var jsonReader = new JsonTextReader(stringReader);
+                while (jsonReader.Read()) { }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Deserialize JSON from file
         /// </summary>
         public static T? DeserializeFromFile<T>(string filePath) where T : class
