@@ -1,4 +1,6 @@
+using System;
 using Newtonsoft.Json;
+using NetraAI.Desktop.Utils;
 
 namespace NetraAI.Desktop.Models
 {
@@ -44,6 +46,42 @@ namespace NetraAI.Desktop.Models
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Checks whether active user authentication credentials exist
+        /// </summary>
+        public bool IsAuthenticated => !string.IsNullOrWhiteSpace(AuthToken) && !string.IsNullOrWhiteSpace(UserId);
+
+        /// <summary>
+        /// Clears all authentication state and cached user information
+        /// </summary>
+        public void ClearAuthentication()
+        {
+            UserId = string.Empty;
+            AuthToken = null;
+            RefreshToken = null;
+            Email = null;
+            DisplayName = null;
+            RememberMe = false;
+            LastUpdated = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Checks whether configured theme is a recognized application theme
+        /// </summary>
+        public bool IsValidTheme() => Constants.IsValidTheme(Theme);
+
+        /// <summary>
+        /// Resets application settings to default values
+        /// </summary>
+        public void ResetToDefaults()
+        {
+            Theme = "dark";
+            Hotkey = "Ctrl+Alt+A";
+            AutoStart = false;
+            Permissions = new PermissionSettings();
+            LastUpdated = DateTime.UtcNow;
+        }
+
+        /// <summary>
         /// Permission settings sub-object
         /// </summary>
         public class PermissionSettings
@@ -59,6 +97,11 @@ namespace NetraAI.Desktop.Models
 
             [JsonProperty("clipboard_access")]
             public bool ClipboardAccess { get; set; } = false;
+
+            /// <summary>
+            /// Returns whether any permission is granted
+            /// </summary>
+            public bool HasAnyPermission => ScreenAccess || MicAccess || BackgroundRunning || ClipboardAccess;
         }
     }
 }
