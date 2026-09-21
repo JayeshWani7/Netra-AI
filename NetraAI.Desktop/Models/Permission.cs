@@ -33,5 +33,46 @@ namespace NetraAI.Desktop.Models
         /// Check if user has permission for clipboard access
         /// </summary>
         public bool HasClipboardAccess() => ClipboardAccess && IsExplicitlyRequested;
+
+        /// <summary>
+        /// Check if user has any active permission granted
+        /// </summary>
+        public bool HasAnyPermission => HasScreenAccess() || HasMicrophoneAccess() || HasBackgroundRunning() || HasClipboardAccess();
+
+        /// <summary>
+        /// Check if user has all active permissions granted
+        /// </summary>
+        public bool HasAllPermissions => HasScreenAccess() && HasMicrophoneAccess() && HasBackgroundRunning() && HasClipboardAccess();
+
+        /// <summary>
+        /// Check if the permission model has a valid associated user ID
+        /// </summary>
+        public bool IsValid => !string.IsNullOrWhiteSpace(UserId);
+
+        /// <summary>
+        /// Grant all permissions explicitly
+        /// </summary>
+        public void GrantAll()
+        {
+            ScreenAccess = true;
+            MicrophoneAccess = true;
+            BackgroundRunning = true;
+            ClipboardAccess = true;
+            IsExplicitlyRequested = true;
+            GrantedAt = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Revoke all permissions
+        /// </summary>
+        public void RevokeAll()
+        {
+            ScreenAccess = false;
+            MicrophoneAccess = false;
+            BackgroundRunning = false;
+            ClipboardAccess = false;
+            IsExplicitlyRequested = false;
+            GrantedAt = DateTime.UtcNow;
+        }
     }
 }
