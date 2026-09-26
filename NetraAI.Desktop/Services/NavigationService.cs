@@ -70,6 +70,29 @@ namespace NetraAI.Desktop.Services
         }
 
         /// <summary>
+        /// Checks whether a given view name is registered for navigation
+        /// </summary>
+        public bool CanNavigateTo(string? viewName)
+        {
+            if (string.IsNullOrWhiteSpace(viewName))
+                return false;
+
+            var normalized = viewName.Trim();
+            return string.Equals(normalized, "Login", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "Permissions", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "Main", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "Settings", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Returns all supported registered view names
+        /// </summary>
+        public string[] GetSupportedViews()
+        {
+            return new[] { "Login", "Permissions", "Main", "Settings" };
+        }
+
+        /// <summary>
         /// Navigate to a specific view by name
         /// </summary>
         public void NavigateTo(string viewName)

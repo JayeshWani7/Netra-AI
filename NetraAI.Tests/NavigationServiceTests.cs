@@ -52,5 +52,39 @@ namespace NetraAI.Tests
             Assert.Null(service.CurrentViewName);
             Assert.Null(service.GetCurrentWindow());
         }
+
+        [Theory]
+        [InlineData("Login", true)]
+        [InlineData("LOGIN", true)]
+        [InlineData("  Permissions  ", true)]
+        [InlineData("Main", true)]
+        [InlineData("Settings", true)]
+        [InlineData("UnknownView", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void CanNavigateTo_EvaluatesViewName(string? viewName, bool expectedResult)
+        {
+            var mockLogger = new Mock<ILogger>();
+            var service = new NavigationService(mockLogger.Object);
+
+            var result = service.CanNavigateTo(viewName);
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void GetSupportedViews_ReturnsListOfViews()
+        {
+            var mockLogger = new Mock<ILogger>();
+            var service = new NavigationService(mockLogger.Object);
+
+            var views = service.GetSupportedViews();
+
+            Assert.NotNull(views);
+            Assert.Contains("Login", views);
+            Assert.Contains("Permissions", views);
+            Assert.Contains("Main", views);
+            Assert.Contains("Settings", views);
+            Assert.Equal(4, views.Length);
+        }
     }
 }
