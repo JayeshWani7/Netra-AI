@@ -15,9 +15,26 @@ namespace NetraAI.Desktop.Services
         private AppConfig? _config;
 
         public SettingsService()
+            : this(Path.Combine(Constants.ConfigPath, Constants.SettingsFileName))
         {
-            _settingsFilePath = Path.Combine(Constants.ConfigPath, Constants.SettingsFileName);
         }
+
+        public SettingsService(string settingsFilePath)
+        {
+            _settingsFilePath = !string.IsNullOrWhiteSpace(settingsFilePath)
+                ? settingsFilePath
+                : Path.Combine(Constants.ConfigPath, Constants.SettingsFileName);
+        }
+
+        /// <summary>
+        /// Gets the target path of the settings JSON file
+        /// </summary>
+        public string SettingsFilePath => _settingsFilePath;
+
+        /// <summary>
+        /// Checks whether the settings JSON file exists on disk
+        /// </summary>
+        public bool SettingsFileExists => File.Exists(_settingsFilePath);
 
         public AppConfig GetConfig()
         {
@@ -79,6 +96,20 @@ namespace NetraAI.Desktop.Services
         {
             var defaultConfig = new AppConfig();
             return await SaveAsync(defaultConfig);
+        }
+
+        /// <summary>
+        /// Updates the current configuration using an update delegate and persists the updated settings
+        /// </summary>
+        public async Task<bool> UpdateConfigAsync(Action<AppConfig> updateAction)
+        {
+            if (updateAction == null)
+                return false;
+
+            var currentConfig = GetConfig();
+            updateAction(currentConfig);
+            currentConfig.LastUpdated = DateTime.UtcNow;
+            return await SaveAsync(currentConfig);
         }
     }
 }

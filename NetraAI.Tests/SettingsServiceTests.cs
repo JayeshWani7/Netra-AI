@@ -74,6 +74,47 @@ namespace NetraAI.Tests
             Assert.Empty(loaded.UserId);
         }
 
+        [Fact]
+        public void Constructor_CustomFilePath_InitializesCorrectly()
+        {
+            var tempPath = Path.Combine(Path.GetTempPath(), $"custom_settings_{Guid.NewGuid()}.json");
+            var customService = new SettingsService(tempPath);
+
+            Assert.Equal(tempPath, customService.SettingsFilePath);
+            Assert.False(customService.SettingsFileExists);
+        }
+
+        [Fact]
+        public async Task UpdateConfigAsync_ModifiesAndPersistsConfig()
+        {
+            var tempPath = Path.Combine(Path.GetTempPath(), $"custom_settings_{Guid.NewGuid()}.json");
+            var customService = new SettingsService(tempPath);
+
+            try
+            {
+                var result = await customService.UpdateConfigAsync(cfg =>
+                {
+                    cfg.Theme = "light";
+                    cfg.RememberMe = true;
+                });
+
+                Assert.True(result);
+                Assert.True(customService.SettingsFileExists);
+
+                var loaded = await customService.LoadAsync();
+                Assert.NotNull(loaded);
+                Assert.Equal("light", loaded.Theme);
+                Assert.True(loaded.RememberMe);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+            }
+        }
+
         private void CleanupSettingsFile()
         {
             try
