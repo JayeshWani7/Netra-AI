@@ -56,5 +56,49 @@ namespace NetraAI.Tests
             var result = await service.GenerateAsync("Test prompt", null, CancellationToken.None);
             Assert.Equal("Hello from Gemini", result);
         }
+
+        [Fact]
+        public void IsConfigured_EvaluatesApiKeyPresence()
+        {
+            var unconfiguredService = new GeminiService(null, null, apiKey: "");
+            Assert.False(unconfiguredService.IsConfigured);
+
+            var configuredService = new GeminiService(null, null, apiKey: "ai-test-key-123");
+            Assert.True(configuredService.IsConfigured);
+        }
+
+        [Fact]
+        public void GetConfiguredModel_ReturnsDefaultOrConfiguredModel()
+        {
+            var service = new GeminiService();
+            var model = service.GetConfiguredModel();
+
+            Assert.False(string.IsNullOrWhiteSpace(model));
+        }
+
+        [Fact]
+        public async Task GenerateAsync_DefaultCancellationTokenOverload_Succeeds()
+        {
+            var mockHandler = new Mock<HttpMessageHandler>();
+            var jsonResponse = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"Overload response\"}]}}]}";
+
+            mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                });
+
+            var httpClient = new HttpClient(mockHandler.Object);
+            var service = new GeminiService(httpClient, apiKey: "valid-key");
+
+            var result = await service.GenerateAsync("Overload test");
+            Assert.Equal("Overload response", result);
+        }
     }
 }

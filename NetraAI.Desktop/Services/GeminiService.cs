@@ -29,6 +29,27 @@ namespace NetraAI.Desktop.Services
             _apiKey = apiKey;
         }
 
+        /// <summary>
+        /// Checks whether an API key is configured for Gemini API access
+        /// </summary>
+        public bool IsConfigured => !string.IsNullOrWhiteSpace(_apiKey ?? ConfigurationManager.GetValue("Gemini:ApiKey"));
+
+        /// <summary>
+        /// Gets the configured Gemini model identifier
+        /// </summary>
+        public string GetConfiguredModel()
+        {
+            return ConfigurationManager.GetValue("Gemini:Model") ?? "gemini-1.5-flash";
+        }
+
+        /// <summary>
+        /// Generates content using prompt and optional image bytes with default cancellation token
+        /// </summary>
+        public Task<string> GenerateAsync(string prompt, byte[]? pngBytes = null)
+        {
+            return GenerateAsync(prompt, pngBytes, CancellationToken.None);
+        }
+
         public async Task<string> GenerateAsync(string prompt, byte[]? pngBytes, CancellationToken cancellationToken)
         {
             var apiKey = _apiKey ?? ConfigurationManager.GetValue("Gemini:ApiKey");
