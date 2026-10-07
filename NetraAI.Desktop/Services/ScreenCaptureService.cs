@@ -72,5 +72,60 @@ namespace NetraAI.Desktop.Services
                 return null;
             }
         }
+
+        private static readonly byte[] PngHeader = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+        /// <summary>
+        /// Validates whether the byte array begins with standard PNG magic header bytes
+        /// </summary>
+        public static bool IsValidPngHeader(byte[]? pngBytes)
+        {
+            if (pngBytes == null || pngBytes.Length < 8)
+                return false;
+
+            for (int i = 0; i < 8; i++)
+            {
+                if (pngBytes[i] != PngHeader[i])
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Converts PNG bytes to a base64 Data URL string
+        /// </summary>
+        public static string ToBase64DataUrl(byte[]? pngBytes)
+        {
+            if (pngBytes == null || pngBytes.Length == 0)
+                return string.Empty;
+
+            var base64 = Convert.ToBase64String(pngBytes);
+            return $"data:image/png;base64,{base64}";
+        }
+
+        /// <summary>
+        /// Safely saves screenshot bytes to the specified file path
+        /// </summary>
+        public static bool TrySaveToFile(byte[]? pngBytes, string filePath)
+        {
+            if (pngBytes == null || pngBytes.Length == 0 || string.IsNullOrWhiteSpace(filePath))
+                return false;
+
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                File.WriteAllBytes(filePath, pngBytes);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.GetInstance().Error($"Failed to save screenshot to file: {ex.Message}", ex);
+                return false;
+            }
+        }
     }
 }
