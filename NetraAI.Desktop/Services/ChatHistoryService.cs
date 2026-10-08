@@ -40,6 +40,37 @@ namespace NetraAI.Desktop.Services
             }
         }
 
+        /// <summary>
+        /// Gets the total number of chat messages saved for the user
+        /// </summary>
+        public async Task<int> GetMessageCountAsync(string userId)
+        {
+            var messages = await GetMessagesAsync(userId);
+            return messages.Count;
+        }
+
+        /// <summary>
+        /// Gets the latest message for the user, or null if no history exists
+        /// </summary>
+        public async Task<ChatMessage?> GetLatestMessageAsync(string userId)
+        {
+            var messages = await GetMessagesAsync(userId);
+            return messages.LastOrDefault();
+        }
+
+        /// <summary>
+        /// Appends a single message to user chat history
+        /// </summary>
+        public Task<bool> AppendMessageAsync(string userId, ChatMessage message)
+        {
+            if (message == null)
+            {
+                _logger.Warning("AppendMessageAsync called with null message.");
+                return Task.FromResult(false);
+            }
+            return AppendMessagesAsync(userId, new[] { message });
+        }
+
         public Task<bool> AppendMessagesAsync(string userId, IEnumerable<ChatMessage> messages)
         {
             try
@@ -73,6 +104,14 @@ namespace NetraAI.Desktop.Services
                 _logger.Error($"Failed to save chat history: {ex.Message}", ex);
                 return Task.FromResult(false);
             }
+        }
+
+        /// <summary>
+        /// Deletes a single message by ID
+        /// </summary>
+        public Task<bool> DeleteMessageAsync(string userId, Guid messageId)
+        {
+            return DeleteMessagesAsync(userId, new[] { messageId });
         }
 
         public Task<bool> DeleteMessagesAsync(string userId, IEnumerable<Guid> messageIds)

@@ -68,6 +68,58 @@ namespace NetraAI.Tests
         }
 
         [Fact]
+        public async Task AppendMessageAsync_SingleMessage_PersistsSuccessfully()
+        {
+            var msg = new ChatMessage
+            {
+                Id = Guid.NewGuid(),
+                Role = "user",
+                Content = "Single message",
+                Timestamp = DateTime.UtcNow
+            };
+
+            var result = await _service.AppendMessageAsync(_testUserId, msg);
+            Assert.True(result);
+
+            var count = await _service.GetMessageCountAsync(_testUserId);
+            Assert.Equal(1, count);
+
+            var latest = await _service.GetLatestMessageAsync(_testUserId);
+            Assert.NotNull(latest);
+            Assert.Equal("Single message", latest!.Content);
+        }
+
+        [Fact]
+        public async Task AppendMessageAsync_NullMessage_ReturnsFalse()
+        {
+            var result = await _service.AppendMessageAsync(_testUserId, null!);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task GetLatestMessageAsync_NoHistory_ReturnsNull()
+        {
+            var latest = await _service.GetLatestMessageAsync(_testUserId);
+            Assert.Null(latest);
+        }
+
+        [Fact]
+        public async Task DeleteMessageAsync_SingleMessageId_RemovesTargetMessage()
+        {
+            var msg1 = new ChatMessage { Id = Guid.NewGuid(), Role = "user", Content = "Message 1", Timestamp = DateTime.UtcNow };
+            var msg2 = new ChatMessage { Id = Guid.NewGuid(), Role = "assistant", Content = "Message 2", Timestamp = DateTime.UtcNow.AddSeconds(1) };
+
+            await _service.AppendMessagesAsync(_testUserId, new[] { msg1, msg2 });
+
+            var deleted = await _service.DeleteMessageAsync(_testUserId, msg1.Id);
+            Assert.True(deleted);
+
+            var remaining = await _service.GetMessagesAsync(_testUserId);
+            Assert.Single(remaining);
+            Assert.Equal(msg2.Id, remaining[0].Id);
+        }
+
+        [Fact]
         public async Task DeleteMessagesAsync_RemovesSpecifiedMessages()
         {
             var msg1 = new ChatMessage { Id = Guid.NewGuid(), Role = "user", Content = "Msg 1", Timestamp = DateTime.UtcNow };
