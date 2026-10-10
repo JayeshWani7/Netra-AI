@@ -38,5 +38,36 @@ namespace NetraAI.Tests
         {
             Assert.False(HotkeyManager.ParseHotkeyString("Ctrl+Alt", out _, out _));
         }
+
+        [Theory]
+        [InlineData("Ctrl+Alt+A", true)]
+        [InlineData("Shift+G", true)]
+        [InlineData("Win+Alt+R", true)]
+        [InlineData("Ctrl+Alt", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void IsValidHotkeyString_EvaluatesHotkeyFormat(string? hotkeyString, bool expectedResult)
+        {
+            var result = HotkeyManager.IsValidHotkeyString(hotkeyString);
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public void FormatHotkey_ValidModifiersAndKey_ReturnsFormattedString()
+        {
+            var formatted = HotkeyManager.FormatHotkey(
+                HotkeyManager.Modifiers.Control | HotkeyManager.Modifiers.Alt,
+                (uint)'A'
+            );
+
+            Assert.Equal("Ctrl+Alt+A", formatted);
+        }
+
+        [Fact]
+        public void FormatHotkey_ZeroKey_ReturnsEmptyString()
+        {
+            var formatted = HotkeyManager.FormatHotkey(HotkeyManager.Modifiers.Control, 0);
+            Assert.Equal(string.Empty, formatted);
+        }
     }
 }

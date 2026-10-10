@@ -138,5 +138,33 @@ namespace NetraAI.Desktop.Services
 
             return key != 0;
         }
+
+        /// <summary>
+        /// Validates whether a given string is a valid hotkey combination.
+        /// </summary>
+        public static bool IsValidHotkeyString(string? hotkeyString)
+        {
+            return ParseHotkeyString(hotkeyString, out _, out _);
+        }
+
+        /// <summary>
+        /// Formats modifiers and key code into a standard hotkey string (e.g. "Ctrl+Alt+A").
+        /// </summary>
+        public static string FormatHotkey(Modifiers modifiers, uint key)
+        {
+            if (key == 0)
+            {
+                return string.Empty;
+            }
+
+            var parts = new List<string>();
+            if (modifiers.HasFlag(Modifiers.Control)) parts.Add("Ctrl");
+            if (modifiers.HasFlag(Modifiers.Alt)) parts.Add("Alt");
+            if (modifiers.HasFlag(Modifiers.Shift)) parts.Add("Shift");
+            if (modifiers.HasFlag(Modifiers.Win)) parts.Add("Win");
+
+            parts.Add(((char)key).ToString().ToUpperInvariant());
+            return string.Join("+", parts);
+        }
     }
 }
