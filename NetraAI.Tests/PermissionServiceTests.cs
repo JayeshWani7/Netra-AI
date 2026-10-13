@@ -72,6 +72,81 @@ namespace NetraAI.Tests
             Assert.True(_service.HasClipboardAccess());
         }
 
+        [Fact]
+        public void Constructor_CustomFilePath_InitializesProperties()
+        {
+            var mockLogger = new Mock<ILogger>();
+            var customPath = Path.Combine(Path.GetTempPath(), $"custom_perm_{Guid.NewGuid()}.json");
+            var service = new PermissionService(mockLogger.Object, customPath);
+
+            Assert.Equal(customPath, service.PermissionsFilePath);
+            Assert.False(service.PermissionsFileExists);
+            Assert.Null(service.CurrentPermissions);
+        }
+
+        [Fact]
+        public async Task HasAnyAndAllPermissions_EvaluatesAggregates()
+        {
+            var mockLogger = new Mock<ILogger>();
+            var customPath = Path.Combine(Path.GetTempPath(), $"custom_perm_{Guid.NewGuid()}.json");
+            var service = new PermissionService(mockLogger.Object, customPath);
+
+            try
+            {
+                Assert.False(service.HasAnyPermission());
+                Assert.False(service.HasAllPermissions());
+
+                var permissions = new Permission
+                {
+                    UserId = "user-1",
+                    ScreenAccess = true,
+                    IsExplicitlyRequested = true
+                };
+
+                await service.SavePermissionsAsync(permissions);
+
+                Assert.True(service.HasAnyPermission());
+                Assert.False(service.HasAllPermissions());
+
+                permissions.GrantAll();
+                await service.SavePermissionsAsync(permissions);
+
+                Assert.True(service.HasAnyPermission());
+                Assert.True(service.HasAllPermissions());
+            }
+            finally
+            {
+                if (File.Exists(customPath)) File.Delete(customPath);
+            }
+        }
+
+        [Fact]
+        public async Task ResetPermissionsAsync_RemovesFileAndResetsState()
+        {
+            var mockLogger = new Mock<ILogger>();
+            var customPath = Path.Combine(Path.GetTempPath(), $"custom_perm_{Guid.NewGuid()}.json");
+            var service = new PermissionService(mockLogger.Object, customPath);
+
+            try
+            {
+                var permissions = new Permission { UserId = "user-1", ScreenAccess = true, IsExplicitlyRequested = true };
+                await service.SavePermissionsAsync(permissions);
+
+                Assert.True(service.PermissionsFileExists);
+                Assert.NotNull(service.CurrentPermissions);
+
+                var resetResult = await service.ResetPermissionsAsync();
+
+                Assert.True(resetResult);
+                Assert.False(service.PermissionsFileExists);
+                Assert.Null(service.CurrentPermissions);
+            }
+            finally
+            {
+                if (File.Exists(customPath)) File.Delete(customPath);
+            }
+        }
+
         public void Dispose()
         {
             try

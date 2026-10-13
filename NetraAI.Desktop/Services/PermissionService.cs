@@ -15,11 +15,28 @@ namespace NetraAI.Desktop.Services
         private readonly string _permissionsFilePath;
         private readonly ILogger _logger;
 
-        public PermissionService(ILogger logger)
+        public PermissionService(ILogger logger, string? permissionsFilePath = null)
         {
             _logger = logger;
-            _permissionsFilePath = Path.Combine(Constants.AppDataPath, Constants.PermissionsFileName);
+            _permissionsFilePath = !string.IsNullOrWhiteSpace(permissionsFilePath)
+                ? permissionsFilePath
+                : Path.Combine(Constants.AppDataPath, Constants.PermissionsFileName);
         }
+
+        /// <summary>
+        /// Gets the currently loaded permissions in memory
+        /// </summary>
+        public Permission? CurrentPermissions => _permissions;
+
+        /// <summary>
+        /// Gets the target path of the permissions file
+        /// </summary>
+        public string PermissionsFilePath => _permissionsFilePath;
+
+        /// <summary>
+        /// Checks whether the permissions file exists on disk
+        /// </summary>
+        public bool PermissionsFileExists => File.Exists(_permissionsFilePath);
 
         /// <summary>
         /// Load permissions from storage
@@ -84,6 +101,38 @@ namespace NetraAI.Desktop.Services
         /// Check if user has clipboard access permission
         /// </summary>
         public bool HasClipboardAccess() => _permissions?.HasClipboardAccess() ?? false;
+
+        /// <summary>
+        /// Check if user has any active permission granted
+        /// </summary>
+        public bool HasAnyPermission() => _permissions?.HasAnyPermission ?? false;
+
+        /// <summary>
+        /// Check if user has all active permissions granted
+        /// </summary>
+        public bool HasAllPermissions() => _permissions?.HasAllPermissions ?? false;
+
+        /// <summary>
+        /// Resets and clears persisted permissions
+        /// </summary>
+        public Task<bool> ResetPermissionsAsync()
+        {
+            try
+            {
+                if (File.Exists(_permissionsFilePath))
+                {
+                    File.Delete(_permissionsFilePath);
+                }
+                _permissions = null;
+                _logger.Info("Permissions reset successfully");
+                return Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to reset permissions: {ex.Message}", ex);
+                return Task.FromResult(false);
+            }
+        }
 
         /// <summary>
         /// Request permission from user
