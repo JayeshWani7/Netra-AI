@@ -44,6 +44,73 @@ namespace NetraAI.Tests
             Assert.False(user2.IsValid());
         }
 
+        [Theory]
+        [InlineData("John Doe", "john@example.com", "JD")]
+        [InlineData("Jane", "jane@example.com", "J")]
+        [InlineData("", "alice.smith@example.com", "AS")]
+        [InlineData("", "bob@example.com", "B")]
+        [InlineData("", "", "U")]
+        [InlineData("  First  Last  ", "", "FL")]
+        public void GetInitials_EvaluatesDisplayNameAndEmail(string displayName, string email, string expectedInitials)
+        {
+            var user = new User { DisplayName = displayName, Email = email };
+            Assert.Equal(expectedInitials, user.GetInitials());
+        }
+
+        [Fact]
+        public void IsAuthenticated_EvaluatesTokenAndIdentity()
+        {
+            var userWithToken = new User
+            {
+                UserId = "user-1",
+                Email = "user@example.com",
+                AuthToken = "token-123"
+            };
+            Assert.True(userWithToken.IsAuthenticated);
+
+            var userWithoutToken = new User
+            {
+                UserId = "user-1",
+                Email = "user@example.com",
+                AuthToken = null
+            };
+            Assert.False(userWithoutToken.IsAuthenticated);
+
+            var userInvalid = new User
+            {
+                UserId = "",
+                Email = "",
+                AuthToken = "token-123"
+            };
+            Assert.False(userInvalid.IsAuthenticated);
+        }
+
+        [Fact]
+        public void UpdateLastLogin_UpdatesTimestamp()
+        {
+            var user = new User { LastLoginAt = DateTime.UtcNow.AddHours(-1) };
+            var before = DateTime.UtcNow;
+
+            user.UpdateLastLogin();
+
+            Assert.True(user.LastLoginAt >= before);
+        }
+
+        [Fact]
+        public void ClearAuthentication_ClearsTokens()
+        {
+            var user = new User
+            {
+                AuthToken = "auth-token",
+                RefreshToken = "refresh-token"
+            };
+
+            user.ClearAuthentication();
+
+            Assert.Null(user.AuthToken);
+            Assert.Null(user.RefreshToken);
+        }
+
         [Fact]
         public void ChatMessage_RoleProperties_IdentifiesUserAndAssistant()
         {
