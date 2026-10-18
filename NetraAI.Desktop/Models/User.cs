@@ -30,15 +30,31 @@ namespace NetraAI.Desktop.Models
         /// </summary>
         public string GetInitials()
         {
-            var name = !string.IsNullOrWhiteSpace(DisplayName) ? DisplayName.Trim() : Email.Trim();
-            if (string.IsNullOrWhiteSpace(name)) return "U";
-
-            var parts = name.Split(new[] { ' ', '.' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length >= 2 && parts[0].Length > 0 && parts[1].Length > 0)
+            if (!string.IsNullOrWhiteSpace(DisplayName))
             {
-                return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+                var parts = DisplayName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2 && parts[0].Length > 0 && parts[1].Length > 0)
+                {
+                    return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+                }
+                return char.ToUpperInvariant(parts[0][0]).ToString();
             }
-            return char.ToUpperInvariant(name[0]).ToString();
+
+            if (!string.IsNullOrWhiteSpace(Email))
+            {
+                var localPart = Email.Trim().Split('@')[0];
+                var parts = localPart.Split(new[] { '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2 && parts[0].Length > 0 && parts[1].Length > 0)
+                {
+                    return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+                }
+                if (localPart.Length > 0)
+                {
+                    return char.ToUpperInvariant(localPart[0]).ToString();
+                }
+            }
+
+            return "U";
         }
 
         /// <summary>
