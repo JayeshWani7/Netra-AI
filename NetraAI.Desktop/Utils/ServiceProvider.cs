@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using NetraAI.Desktop.Services;
 
@@ -9,7 +10,7 @@ namespace NetraAI.Desktop.Utils
     public static class ServiceProvider
     {
         private static IServiceProvider? _provider;
-        private static object _lockObject = new object();
+        private static readonly object _lockObject = new object();
 
         /// <summary>
         /// Gets whether the service provider container is initialized
@@ -17,9 +18,9 @@ namespace NetraAI.Desktop.Utils
         public static bool IsInitialized => _provider != null;
 
         /// <summary>
-        /// Initialize dependency injection container
+        /// Initialize dependency injection container with optional custom service configuration
         /// </summary>
-        public static void Initialize()
+        public static void Initialize(Action<IServiceCollection>? configureServices = null)
         {
             lock (_lockObject)
             {
@@ -42,6 +43,8 @@ namespace NetraAI.Desktop.Utils
                     services.AddSingleton<GeminiService>();
                     services.AddSingleton<ScreenCaptureService>();
 
+                    configureServices?.Invoke(services);
+
                     _provider = services.BuildServiceProvider();
 
                     Logger.GetInstance().Info("Dependency injection container initialized");
@@ -55,6 +58,30 @@ namespace NetraAI.Desktop.Utils
         public static T? GetService<T>() where T : class
         {
             return _provider?.GetService<T>();
+        }
+
+        /// <summary>
+        /// Attempts to resolve a service instance safely
+        /// </summary>
+        public static bool TryGetService<T>(out T? service) where T : class
+        {
+            service = GetService<T>();
+            return service != null;
+        }
+
+        /// <summary>
+        /// Resets the dependency injection container and disposes existing provider if applicable
+        /// </summary>
+        public static void Reset()
+        {
+            lock (_lockObject)
+            {
+                if (_provider is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+                _provider = null;
+            }
         }
 
         /// <summary>
